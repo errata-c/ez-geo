@@ -37,11 +37,11 @@ target_compile_definitions(ez-geo PRIVATE
 #target_compile_options(ez-geo PRIVATE "$<BUILD_INTERFACE:$<$<CXX_COMPILER_ID:MSVC>:/permissive->>")
 
 if(${BUILD_TESTS})
-	add_subdirectory("tests")
+	#add_subdirectory("tests")
 endif()
 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/ez-geo)
 
+set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/ez-geo)
 
 install(
 	DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
