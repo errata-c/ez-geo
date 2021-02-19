@@ -11,7 +11,7 @@ namespace ez {
 
 		Circle(T r = static_cast<T>(1), const vec2_t& o = vec2_t{static_cast<T>(0)})
 			: radius(r)
-			, position(o)
+			, origin(o)
 		{}
 
 		~Circle() = default;
@@ -21,10 +21,10 @@ namespace ez {
 		Circle& operator=(Circle&&) noexcept = default;
 
 		void translate(const vec2_t & off) {
-			position += off;
+			origin += off;
 		}
 		void move(const vec2_t& pos) {
-			position = pos;
+			origin = pos;
 		}
 		void resize(T size) {
 			radius = size;
@@ -41,17 +41,17 @@ namespace ez {
 		}
 
 		const vec2_t& getOrigin() const {
-			return position;
+			return origin;
 		}
 		void setOrigin(const vec2_t & o) {
-			position = o;
+			origin = o;
 		}
 
 		const vec2_t& getLocation() const {
-			return position;
+			return origin;
 		}
 		void setLocation(const vec2_t& loc) {
-			position = loc;
+			origin = loc;
 		}
 
 		static Circle fromOuterTriangle(const vec2_t& c1, const vec2_t& c2, const vec2_t& c3) {
@@ -68,6 +68,6 @@ namespace ez {
 		}
 
 		T radius;
-		vec2_t position;
+		vec2_t origin;
 	};
 };

@@ -9,7 +9,7 @@ namespace ez {
 
 		Sphere(T r = static_cast<T>(1), const vec3_t& o = vec3_t{static_cast<T>(0)})
 			: radius(r)
-			, position(o)
+			, origin(o)
 		{}
 
 		~Sphere() = default;
@@ -19,24 +19,24 @@ namespace ez {
 		Sphere& operator=(Sphere&&) noexcept = default;
 
 		void translate(const vec3_t& off) {
-			position += off;
+			origin += off;
 		}
 		void move(const vec3_t& loc) {
-			position = loc;
+			origin = loc;
 		}
 
 		const vec3_t& getLocation() const {
-			return position;
+			return origin;
 		}
 		void setLocation(const vec3_t& loc) {
-			position = loc;
+			origin = loc;
 		}
 
 		const vec3_t& getOrigin() const {
-			return position;
+			return origin;
 		}
 		void setOrigin(const vec3_t& loc) {
-			position = loc;
+			origin = loc;
 		}
 
 		void scaleBy(T amount) {
@@ -53,6 +53,6 @@ namespace ez {
 		}
 
 		T radius;
-		vec3_t position;
+		vec3_t origin;
 	};
 };

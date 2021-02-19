@@ -10,6 +10,7 @@
 
 namespace ez {
 	namespace Bezier {
+		// Vector type checks, decltype allows using expessions in type substitutions.
 		template<typename T, typename = int>
 		struct is_vec : public std::false_type {};
 		template<typename T>
@@ -32,6 +33,13 @@ namespace ez {
 			static constexpr std::size_t length = 1;
 		};
 
+		template<typename T>
+		inline constexpr bool is_vec_v = is_vec<T>::value;
+		template<typename T>
+		using vec_value_t = typename is_vec<T>::value_type;
+
+
+		// Random access iterator to valid vec type
 		template <typename T, typename = int>
 		struct is_random_iterator : public std::false_type {
 			using vec_t = void;
@@ -50,6 +58,14 @@ namespace ez {
 			using value_type = typename is_vec<vec_t>::value_type;
 		};
 
+		template<typename T>
+		inline constexpr bool is_random_iterator_v = is_random_iterator<T>::value;
+		template<typename T>
+		using random_iterator_value_t = typename is_random_iterator<T>::value_type;
+
+
+
+		// Input iterator to valid vec type
 		template <typename T, typename = int>
 		struct is_input_iterator : public std::false_type {};
 		template <typename T>
@@ -61,18 +77,25 @@ namespace ez {
 			static constexpr bool value = is_vec<T>::value;
 		};
 
+		template<typename T>
+		inline constexpr bool is_input_iterator_v = is_input_iterator<T>::value;
+		template<typename T>
+		using input_iterator_value_t = typename is_input_iterator<T>::value_type;
+
+
+		// Output iterator 
 		template <typename T, typename vec_t, typename = int>
 		struct is_output_iterator : public std::false_type {};
 
-		// Note the decl type includes an assignment, which will fail to compile when the iterator is not assignable.
 		template <typename T, typename vec_t>
 		struct is_output_iterator <T, vec_t, decltype((typename T::iterator_category*)0, 0) > {
 			static constexpr bool value =
 				(!std::is_same<typename T::iterator_category, std::input_iterator_tag>::value) &&
 				(std::is_same<typename T::value_type, vec_t>::value || std::is_same<typename T::value_type, void>::value);
 			// Check for void, because back_insert_iterators make their value_type void. As far as I know, no other iterators do this.
+			// TODO: need a good way to check for container_type. 
 		};
-
+		// Simple pointer overload.
 		template <typename T, typename vec_t>
 		struct is_output_iterator <T*, vec_t, int> {
 			static constexpr bool value = std::is_same<T, vec_t>::value;

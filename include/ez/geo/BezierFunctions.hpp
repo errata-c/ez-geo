@@ -13,7 +13,7 @@
 #include <glm/vec4.hpp>
 #include <glm/geometric.hpp>
 #include <glm/gtx/norm.hpp>
-#include "AABB2d.hpp"
+#include "AABB.hpp"
 #include "CBezier.hpp"
 
 #define EZ_GEO_BEZIER_FUNCTIONS_INCLUDED

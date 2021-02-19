@@ -5,7 +5,7 @@
 #include <glm/mat3x3.hpp>
 #include <glm/mat4x4.hpp>
 
-#include "Ray3d.hpp"
+#include "Ray.hpp"
 
 namespace ez {
 
@@ -202,12 +202,12 @@ namespace ez {
 			return glm::rotate(rotation, axis);
 		}
 
-		Ray3d<T> toLocalRotation(const Ray3d<T>&) const {
-			return Ray3d<T>{ toLocalRotation(r.getAxis()), r.getOrigin() };
+		Ray3<T> toLocalRotation(const Ray3<T>&) const {
+			return Ray3<T>{ toLocalRotation(r.getAxis()), r.getOrigin() };
 		}
 		
-		Ray3d<T> toWorldRotation(const Ray3d<T>&) const {
-			return Ray3d<T>{ toWorldRotation(r.getAxis()), r.getOrigin() };
+		Ray3<T> toWorldRotation(const Ray3<T>&) const {
+			return Ray3<T>{ toWorldRotation(r.getAxis()), r.getOrigin() };
 		}
 
 		quat_t rotation;

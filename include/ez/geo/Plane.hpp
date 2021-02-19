@@ -1,50 +1,78 @@
 #pragma once
+#include <type_traits>
 #include <glm/vec3.hpp>
+#include <ez/math/Complex.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 namespace ez {
-	template<typename T>
+	// Generic N-dimensional plane. Rotation only supported for 2 and 3 dimensions.
+	template<typename T, int N>
 	struct Plane {
-		using vec_t = glm::tvec3<T>;
+		static_assert(N > 1, "1 Dimensional planes are not supported.");
+		static_assert(N < 5, "Vector types with more than 4 coorinates are not supported.");
+		using vec_t = glm::vec<N, T>;
 
-		Plane()
-			: normal{static_cast<T>(1), static_cast<T>(0), static_cast<T>(0)}
-			, position{static_cast<T>(0)}
-		{}
-		Plane(const vec_t& norm, const vec_t& orig)
+		Plane() noexcept
+			: normal{ static_cast<T>(0) }
+			, origin{ static_cast<T>(0) }
+		{
+			normal[0] = static_cast<T>(1);
+		};
+		Plane(const vec_t& norm, const vec_t& orig) noexcept
 			: normal(norm)
-			, position(orig)
-		{}
+			, origin(orig)
+		{};
 
-		void normalize() {
+		void normalize() noexcept {
 			normal = glm::normalize(normal);
 		}
 
-		void move(const vec_t& point) {
-			position = point;
-		}
-		void translate(const vec_t& offset) {
-			position += offset;
-		}
-		void rotate(T angle, const vec_t& axis) {
+		void move(const vec_t& point) noexcept {
+			origin = point;
+		};
+		void translate(const vec_t& offset) noexcept {
+			origin += offset;
+		};
+
+		template<typename = std::enable_if_t<N == 3>>
+		void rotate(T angle, const vec_t& axis) noexcept {
+			glm::tquat<T> rot = glm::angleAxis<T>(angle, axis);
+			Plane::rotate(rot);
+		};
+		template<typename = std::enable_if_t<N == 3>>
+		void rotate(const glm::tquat<T>& rot) noexcept {
+			normal = glm::rotate<T>(rot, normal);
+		};
+
+		template<typename = std::enable_if_t<N == 2>>
+		void rotate(T angle) noexcept {
 			glm::quat rot = glm::angleAxis(angle, axis);
 			Plane::rotate(rot);
-		}
-		void rotate(const glm::quat& rot) {
-			normal = glm::rotate(rot, normal);
-		}
+		};
+		template<typename = std::enable_if_t<N == 2>>
+		void rotate(const ez::Complex<T>& rot) noexcept {
+			normal = rot.rotate(normal);
+		};
 
+		// Dont know if I like this...
 		bool isFacing(const vec_t& p) const {
-			T det = glm::dot(normal, p - position);
+			T det = glm::dot(normal, p - origin);
 			return det >= 0.f;
-		}
+		};
 
+		// Dont know if I like this...
 		T distanceFrom(const vec_t& p) const {
-			vec_t B = p - position;
+			vec_t B = p - origin;
 			return glm::dot(normal, B);
-		}
+		};
 
-		vec_t normal, position;
+		vec_t normal, origin;
 	};
+
+	template<typename T>
+	using Plane2 = Plane<T, 2>;
+
+	template<typename T>
+	using Plane3 = Plane<T, 3>;
 };
