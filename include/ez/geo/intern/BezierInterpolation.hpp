@@ -13,14 +13,14 @@ namespace ez {
 	namespace Bezier {
 		// Line interpolation
 		template<typename T, std::enable_if_t<is_vec<T>::value, int> = 0>
-		T interpolate(const T& p0, const T& p1, typename is_vec<T>::value_type t) {
+		T interpolate(const T& p0, const T& p1, vec_value_t<T> t) {
 			return p0 * (static_cast<T>(1) - t) + p1 * t;
 		};
 
 		// Normal quadratic
 		template<typename T, std::enable_if_t<is_vec<T>::value, int> = 0>
-		T interpolate(const T& p0, const T& p1, const T& p2, typename is_vec<T>::value_type t) {
-			using value_type = typename is_vec<T>::value_type;
+		T interpolate(const T& p0, const T& p1, const T& p2, vec_value_t<T> t) {
+			using value_type = vec_value_t<T>;
 
 			value_type t1 = static_cast<value_type>(1) - t;
 
@@ -29,8 +29,8 @@ namespace ez {
 
 		// Normal cubic
 		template<typename T, std::enable_if_t<is_vec<T>::value, int> = 0>
-		T interpolate(const T& p0, const T& p1, const T& p2, const T& p3, typename is_vec<T>::value_type t) {
-			using value_type = typename is_vec<T>::value_type;
+		T interpolate(const T& p0, const T& p1, const T& p2, const T& p3, vec_value_t<T> t) {
+			using value_type = vec_value_t<T>;
 			value_type t1 = static_cast<value_type>(1) - t;
 			value_type tt = t * t;
 			value_type t1t1 = t1 * t1;

@@ -17,7 +17,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename Iter>
 		void split(const vec_t& p0, const vec_t& p1, const vec_t& p2, U t, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 
@@ -42,7 +42,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename Iter>
 		void leftSplit(const vec_t& p0, const vec_t& p1, const vec_t& p2, U t, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 
@@ -66,7 +66,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename Iter>
 		void rightSplit(const vec_t& p0, const vec_t& p1, const vec_t& p2, U t, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 
@@ -90,7 +90,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename Iter>
 		void split(const vec_t& p0, const vec_t& p1, const vec_t& p2, const vec_t& p3, U t, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 
@@ -129,7 +129,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename Iter>
 		void leftSplit(const vec_t& p0, const vec_t& p1, const vec_t& p2, const vec_t& p3, U t, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 
@@ -162,7 +162,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename Iter>
 		void rightSplit(const vec_t& p0, const vec_t& p1, const vec_t& p2, const vec_t& p3, U t, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 
@@ -196,7 +196,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename  Iter>
 		void segment(const vec_t& p0, const vec_t& p1, const vec_t& p2, U t0, U t1, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 
@@ -214,7 +214,7 @@ namespace ez {
 		template<typename vec_t, typename U, typename  Iter>
 		void segment(const vec_t& p0, const vec_t& p1, const vec_t& p2, const vec_t p3, U t0, U t1, Iter output) {
 			static_assert(is_vec<vec_t>::value, "The points passed in must be vectors!");
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			static_assert(std::is_floating_point<U>::value, "The interpolation value passed in must be floating point!");
 

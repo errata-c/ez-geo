@@ -1,115 +1,208 @@
 #pragma once
 #include <ez/math/MathConstants.hpp>
+#include <glm/common.hpp>
 #include <glm/vec2.hpp>
 #include <algorithm>
 
-namespace ez {
-	template<typename T>
-	struct Rect {
-		using vec_t = glm::tvec2<T>;
+// There are other Rect types, with slightly different properties.
+// MMRect, min max rect has better properties for gui rectangles for instance (expand and shrink funcs are just simple addition/subtractions).
 
-		Rect()
-			: position{static_cast<T>(0)}
+namespace ez {
+	// Note: This struct assumes that the size is all positive and non-zero.
+	// Additionally the bounds of this rect a considered inclusive, meaning maximum point is inside the rect.
+	template<typename T, int N>
+	struct Rect {
+		using vec_t = glm::vec<N, T>;
+		static constexpr int components = N;
+
+		Rect() noexcept
+			: origin{static_cast<T>(0)}
 			, size{static_cast<T>(0)}
 		{}
-		Rect(const vec_t& p, const vec_t& d)
-			: position(p)
-			, size(d)
-		{}
-		Rect(const T & x, const T & y, const T & w, const T & h)
-			: position{x, y}
-			, size{w, h}
+		Rect(const vec_t& _origin, const vec_t& _size) noexcept
+			: origin(_origin)
+			, size(_size)
 		{}
 
 		template<typename U>
-		Rect(const Rect<U>& other)
-			: position{ static_cast<T>(other.position.x), static_cast<T>(other.position.y) }
-			, size{ static_cast<T>(other.size.x), static_cast<T>(other.size.y) }
+		Rect(const Rect<U, N>& other) noexcept
+			: origin{ other.origin }
+			, size{ other.size }
 		{}
 
-		~Rect() = default;
-		Rect(const Rect&) = default;
-		Rect(Rect&&) = default;
-		Rect& operator=(const Rect&) = default;
-		Rect& operator=(Rect&&) = default;
+		~Rect() noexcept = default;
+		Rect(const Rect&) noexcept = default;
+		Rect(Rect&&) noexcept = default;
+		Rect& operator=(const Rect&) noexcept = default;
+		Rect& operator=(Rect&&) noexcept = default;
 
-		Rect& merge(const Rect& other) {
-			vec_t _max = maximum();
-			for (int i = 0; i < 2; ++i) {
-				_max[i] = std::max(_max[i], other.position[i] + other.size[i]);
-				position[i] = std::min(position[i], other.position[i]);
-			}
-
-			size = _max - position;
-			
-			return *this;
+		vec_t center() const noexcept {
+			// Divide by two instead of multiply by 0.5, since the T variable could be an integer type.
+			return (minimum() + maximum()) / static_cast<T>(2);
 		}
 
-		vec_t minimum() const {
-			return position;
+		void translate(const vec_t& offset) noexcept {
+			origin += offset;
 		}
-		vec_t maximum() const {
-			return position + size;
-		}
-
-		const vec_t& getPosition() const {
-			return position;
-		}
-		const vec_t& getSize() const {
-			return size;
+		void centerTo(const vec_t& point) noexcept {
+			translate(point - center());
 		}
 
-		void setPosition(const vec_t & p) {
-			position = p;
+		void expand(const T & amount) noexcept {
+			vec_t c = center();
+			vec_t dim = size / static_cast<T>(2);
+			dim += amount;
+			origin = c - dim;
+			size = dim + dim;
 		}
-		void setSize(const vec_t & s) {
-			size = s;
+		void expand(const vec_t& amount) noexcept {
+			vec_t c = center();
+			vec_t dim = size / static_cast<T>(2);
+			dim += amount;
+			origin = c - dim;
+			size = dim + dim;
 		}
 
-		vec_t toWorld(const vec_t & point) const {
-			return point * size + position;
+		void shrink(const T& amount) noexcept {
+			vec_t c = center();
+			vec_t dim = size / static_cast<T>(2);
+			dim -= amount;
+			dim = glm::max(dim, vec_t{ static_cast<T>(0) });
+			origin = c - dim;
+			size = dim + dim;
 		}
-		vec_t toLocal(const vec_t & point) const {
-			return (point - position) / size;
-		}
-
-		bool isValid() const {
-			return (std::abs(size.x) >= ez::epsilon<T>()) &&
-				(std::abs(size.y) >= ez::epsilon<T>());
+		void shrink(const vec_t& amount) noexcept {
+			vec_t c = center();
+			vec_t dim = size / static_cast<T>(2);
+			dim -= amount;
+			dim = glm::max(dim, vec_t{ static_cast<T>(0) });
+			origin = c - dim;
+			size = dim + dim;
 		}
 
 		template<typename F>
-		bool inBound(const glm::tvec2<F> & point) const {
-			return !(
-				(position.x > point.x) ||
-				(position.y > point.y) ||
-				((position.x + size.x) <= point.x) ||
-				((position.y + size.y) <= point.y)
-				);
+		void scale(const F& factor) {
+			vec_t c = center();
+			vec_t dim = size / static_cast<T>(2);
+			dim *= factor;
+
+			origin = c - dim;
+			size = dim + dim;
+		}
+		template<typename F>
+		void scale(const glm::vec<N, F>& factor) {
+			vec_t c = center();
+			vec_t dim = size / static_cast<T>(2);
+			dim *= factor;
+
+			origin = c - dim;
+			size = dim + dim;
+		}
+		template<typename F>
+		void scale(const vec_t& c, const F& factor) {
+			vec_t minp = minimum() - c;
+			vec_t maxp = maximum() - c;
+			minp = factor * minp + c;
+			maxp = factor * maxp + c;
+			*this = Rect::between(minp, maxp);
+		}
+		template<typename F>
+		void scale(const vec_t& c, const glm::vec<N, F>& factor) {
+			vec_t minp = minimum() - c;
+			vec_t maxp = maximum() - c;
+			minp = factor * minp + c;
+			maxp = factor * maxp + c;
+			*this = Rect::between(minp, maxp);
 		}
 
-		bool inBound(const Rect& other) const {
-			return !(
-				((other.position.x + other.size.x) <= position.x) ||
-				((other.position.y + other.size.y) <= position.y) ||
-				((position.x + size.x) <= other.position.x) ||
-				((position.y + size.y) <= other.position.y)
-				);
+		Rect& merge(const Rect& other) noexcept {
+			vec_t _max = maximum();
+
+			_max = glm::max(_max, other.maximum());
+			origin = glm::min(origin, other.origin);
+
+			size = _max - origin;
+			
+			return *this;
+		}
+		Rect& merge(const vec_t & point) noexcept {
+			vec_t _max = maximum();
+
+			_max = glm::max(_max, point);
+			origin = glm::min(origin, point);
+
+			size = _max - origin;
+
+			return *this;
 		}
 
-		static Rect between(const vec_t& p0, const vec_t& p1) {
+		vec_t minimum() const noexcept {
+			return origin;
+		}
+		vec_t maximum() const noexcept {
+			return origin + size;
+		}
+
+		// This function always succeeds.
+		vec_t toWorld(const vec_t & point) const noexcept {
+			return point * size + origin;
+		}
+		// Check isValid prior to calling this function if theres a chance the rect could be invalid.
+		vec_t toLocal(const vec_t & point) const noexcept {
+			return (point - origin) / size;
+		}
+
+		// Check if the assumptions made by this struct are maintained. Size must be all positive and non-zero.
+		bool isValid() const noexcept {
+			for (int i = 0; i < components; ++i) {
+				if (size[i] < ez::epsilon<T>()) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		template<typename F>
+		bool inBound(const glm::tvec2<F> & point) const noexcept {
+			// If statements to have early return like the normal boolean operators.
+			for (int i = 0; i < components; ++i) {
+				if (point[i] < origin[i]) {
+					return false;
+				}
+				if ((origin[i] + size[i]) < point[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		bool inBound(const Rect& other) const noexcept {
+			// If statements to have early return like the normal boolean operators.
+			for (int i = 0; i < components; ++i) {
+				if (!((other.origin[i] + other.size[i]) <= origin[i])) {
+					return false;
+				}
+				if (!((origin[i] + size[i]) <= other.origin[i])) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		static Rect between(const vec_t& p0, const vec_t& p1) noexcept {
 			Rect tmp;
-			for (int i = 0; i < 2; ++i) {
-				tmp.position[i] = std::min(p0[i], p1[i]);
+			// origin.length() is constexpr of number of elements in the vector
+			for (int i = 0; i < components; ++i) {
+				tmp.origin[i] = std::min(p0[i], p1[i]);
 				tmp.size[i] = std::abs(p1[i] - p0[i]);
 			}
 			return tmp;
 		}
-		static Rect merge(const Rect& a, const Rect& b) {
+		static Rect merge(const Rect& a, const Rect& b) noexcept {
 			Rect tmp = a;
 			return tmp.merge(b);
 		}
 
-		vec_t position, size;
+		vec_t origin, size;
 	};
 };

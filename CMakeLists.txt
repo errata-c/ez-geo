@@ -4,6 +4,12 @@ project(EZ_GEO
 VERSION 0.4.0
 LANGUAGES C CXX)
 
+# TODO:
+#	Consider separating the intersections functions into a separate library
+#	Update the structures to have a consistent api
+#	Bezier functions are getting excessive, maybe should be a separate lib as well
+#	
+
 include(GNUInstallDirs)
 find_package(ez-cmake CONFIG REQUIRED)
 
@@ -26,7 +32,7 @@ target_include_directories(ez-geo PUBLIC
 target_compile_features(ez-geo PUBLIC cxx_std_17)
 
 target_link_libraries(ez-geo 
-PUBLIC glm ez-math
+PUBLIC glm ez::math
 )
 
 target_compile_definitions(ez-geo PRIVATE
@@ -35,6 +41,9 @@ target_compile_definitions(ez-geo PRIVATE
 	"$<$<PLATFORM_ID:Windows>:NOMINMAX>"
 )
 #target_compile_options(ez-geo PRIVATE "$<BUILD_INTERFACE:$<$<CXX_COMPILER_ID:MSVC>:/permissive->>")
+
+set_target_properties(ez-geo PROPERTIES EXPORT_NAME "geo")
+add_library(ez::geo ALIAS "ez-geo")
 
 if(${BUILD_TESTS})
 	#add_subdirectory("tests")
@@ -59,6 +68,7 @@ install(TARGETS ez-geo
 
 install_package(
 	NAME "ez-geo"
+	NAMESPACE "ez::"
 	EXPORT "ez-geo-targets"
 	VERSION "${EZ_GEO_VERSION}"
 	COMPATIBILITY "SameMajorVersion"

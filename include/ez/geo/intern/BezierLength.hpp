@@ -12,16 +12,44 @@
 
 namespace ez {
 	namespace Bezier {
+		namespace intern {
+			template<typename T>
+			T circleArcApprox(T D1, T D2) {
+				static constexpr T coeff = static_cast<T>(1.0 / 3.0);
+				return D2 + (D2 - D1) * coeff;
+			}
+
+			// iterations has to be odd number
+
+			template<typename T>
+			constexpr int quadIterations() {
+				return 19;
+			};
+			template<>
+			constexpr int quadIterations<double>() {
+				return 41;
+			};
+
+			template<typename T>
+			constexpr int cubicIterations() {
+				return 31;
+			};
+			template<>
+			constexpr int cubicIterations<double>() {
+				return 61;
+			};
+		};
+
 		template<typename vec_t, std::enable_if_t<is_vec<vec_t>::value, int> = 0>
-		typename is_vec<vec_t>::value_type length(const vec_t& p0, const vec_t& p1) {
+		vec_value_t<vec_t> length(const vec_t& p0, const vec_t& p1) {
 			return glm::length(p1 - p0);
 		};
 
 		template<typename vec_t, std::enable_if_t<is_vec<vec_t>::value, int> = 0>
-		typename is_vec<vec_t>::value_type length(const vec_t& p0, const vec_t& p1, const vec_t& p2) {
-			using T = typename is_vec<vec_t>::value_type;
-			// Compute 19 points
-			constexpr int N = 19;
+		vec_value_t<vec_t> length(const vec_t& p0, const vec_t& p1, const vec_t& p2) {
+			using T = vec_value_t<vec_t>;
+			
+			constexpr int N = intern::quadIterations<T>();
 			constexpr int N1 = N - 1;
 
 			constexpr T delta = static_cast<T>(1) / static_cast<T>(N1);
@@ -43,10 +71,10 @@ namespace ez {
 		};
 
 		template<typename vec_t, std::enable_if_t<is_vec<vec_t>::value, int> = 0>
-		typename is_vec<vec_t>::value_type length(const vec_t& p0, const vec_t& p1, const vec_t& p2, const vec_t& p3) {
-			using T = typename is_vec<vec_t>::value_type;
+		vec_value_t<vec_t> length(const vec_t& p0, const vec_t& p1, const vec_t& p2, const vec_t& p3) {
+			using T = vec_value_t<vec_t>;
 
-			constexpr int N = 31;
+			constexpr int N = intern::cubicIterations<T>();
 			constexpr int N1 = N - 1;
 
 			constexpr T delta = static_cast<T>(1) / static_cast<T>(N1);
@@ -72,7 +100,7 @@ namespace ez {
 			static_assert(is_random_iterator<Iter>::value, "The iterator passed in must be random access!");
 
 			using vec_t = typename is_random_iterator<Iter>::vec_t;
-			using T = typename is_vec<vec_t>::value_type;
+			using T = vec_value_t<vec_t>;
 
 			std::size_t N1 = ((end - begin) - 1) * 10;
 

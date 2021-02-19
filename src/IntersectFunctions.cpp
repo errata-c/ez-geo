@@ -15,7 +15,7 @@
 
 namespace ez {
 	template<typename T>
-	bool intersect(const Line2d<T>& l1, const Line2d<T>& l2) {
+	bool intersect(const Line2<T>& l1, const Line2<T>& l2) {
 		glm::tvec2<T> d1 = l1.end - l1.start;
 		glm::tvec2<T> d2 = l2.end - l2.start;
 
@@ -45,11 +45,11 @@ namespace ez {
 		}
 	}
 	// This is very strange syntax, googled how to precompile template functions.
-	template bool intersect<float>(const Line2d<float>&, const Line2d<float>&);
-	template bool intersect<double>(const Line2d<double>&, const Line2d<double>&);
+	template bool intersect<float>(const Line2<float>&, const Line2<float>&);
+	template bool intersect<double>(const Line2<double>&, const Line2<double>&);
 
 	template<typename T>
-	bool intersect(const Line2d<T>& l1, const Line2d<T>& l2, glm::tvec2<T>& ret) {
+	bool intersect(const Line2<T>& l1, const Line2<T>& l2, glm::tvec2<T>& ret) {
 		glm::tvec2<T> d1 = l1.end - l1.start;
 		glm::tvec2<T> d2 = l2.end - l2.start;
 
@@ -85,11 +85,11 @@ namespace ez {
 		}
 	}
 	// Precompile templates
-	template bool intersect<float>(const Line2d<float>&, const Line2d<float>&, glm::tvec2<float>& ret);
-	template bool intersect<double>(const Line2d<double>&, const Line2d<double>&, glm::tvec2<double>& ret);
+	template bool intersect<float>(const Line2<float>&, const Line2<float>&, glm::tvec2<float>& ret);
+	template bool intersect<double>(const Line2<double>&, const Line2<double>&, glm::tvec2<double>& ret);
 
 	template<typename T>
-	bool intersect(const Line2d<T>& l1, const Line2d<T>& l2, T& t1) {
+	bool intersect(const Line2<T>& l1, const Line2<T>& l2, T& t1) {
 		glm::tvec2<T> d1 = l1.end - l1.start;
 		glm::tvec2<T> d2 = l2.end - l2.start;
 
@@ -118,11 +118,11 @@ namespace ez {
 		}
 	}
 	// Precompile templates
-	template bool intersect<float>(const Line2d<float>&, const Line2d<float>&, float& t1);
-	template bool intersect<double>(const Line2d<double>&, const Line2d<double>&, double& t2);
+	template bool intersect<float>(const Line2<float>&, const Line2<float>&, float& t1);
+	template bool intersect<double>(const Line2<double>&, const Line2<double>&, double& t2);
 
 	template<typename T>
-	bool intersect(const Line2d<T>& l1, const Line2d<T>& l2, T& t1, T& t2) {
+	bool intersect(const Line2<T>& l1, const Line2<T>& l2, T& t1, T& t2) {
 		glm::tvec2<T> d1 = l1.end - l1.start;
 		glm::tvec2<T> d2 = l2.end - l2.start;
 
@@ -151,30 +151,30 @@ namespace ez {
 		}
 	}
 	// Precompile templates
-	template bool intersect<float>(const Line2d<float>&, const Line2d<float>&, float&, float&);
-	template bool intersect<double>(const Line2d<double>&, const Line2d<double>&, double&, double&);
+	template bool intersect<float>(const Line2<float>&, const Line2<float>&, float&, float&);
+	template bool intersect<double>(const Line2<double>&, const Line2<double>&, double&, double&);
 
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const AABB3d<T>& b) {
+	bool intersect(const Ray3<T>& r, const AABB3<T>& b) {
 		T tmin = -std::numeric_limits<T>::max(), tmax = std::numeric_limits<T>::max();
 
 		glm::tvec3<T> inverseAxis = static_cast<T>(1) / r.axis;
 
-		T t1 = (b.min[0] - r.position[0]) * inverseAxis[0];
-		T t2 = (b.max[0] - r.position[0]) * inverseAxis[0];
+		T t1 = (b.min[0] - r.origin[0]) * inverseAxis[0];
+		T t2 = (b.max[0] - r.origin[0]) * inverseAxis[0];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
 
-		t1 = (b.min[1] - r.position[1]) * inverseAxis[1];
-		t2 = (b.max[1] - r.position[1]) * inverseAxis[1];
+		t1 = (b.min[1] - r.origin[1]) * inverseAxis[1];
+		t2 = (b.max[1] - r.origin[1]) * inverseAxis[1];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
 
-		t1 = (b.min[2] - r.position[2]) * inverseAxis[2];
-		t2 = (b.max[2] - r.position[2]) * inverseAxis[2];
+		t1 = (b.min[2] - r.origin[2]) * inverseAxis[2];
+		t2 = (b.max[2] - r.origin[2]) * inverseAxis[2];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
@@ -182,29 +182,29 @@ namespace ez {
 		return tmax > std::max(tmin, static_cast<T>(0));
 	}
 	// Precompile templates
-	template bool intersect<float>(const Ray3d<float>&, const AABB3d<float>&);
-	template bool intersect<double>(const Ray3d<double>&, const AABB3d<double>&);
+	template bool intersect<float>(const Ray3<float>&, const AABB3<float>&);
+	template bool intersect<double>(const Ray3<double>&, const AABB3<double>&);
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const AABB3d<T>& b, T& t) {
+	bool intersect(const Ray3<T>& r, const AABB3<T>& b, T& t) {
 		T tmin = -std::numeric_limits<T>::max(), tmax = std::numeric_limits<T>::max();
 
 		glm::tvec3<T> inverseAxis = static_cast<T>(1) / r.axis;
 
-		T t1 = (b.min[0] - r.position[0]) * inverseAxis[0];
-		T t2 = (b.max[0] - r.position[0]) * inverseAxis[0];
+		T t1 = (b.min[0] - r.origin[0]) * inverseAxis[0];
+		T t2 = (b.max[0] - r.origin[0]) * inverseAxis[0];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
 
-		t1 = (b.min[1] - r.position[1]) * inverseAxis[1];
-		t2 = (b.max[1] - r.position[1]) * inverseAxis[1];
+		t1 = (b.min[1] - r.origin[1]) * inverseAxis[1];
+		t2 = (b.max[1] - r.origin[1]) * inverseAxis[1];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
 
-		t1 = (b.min[2] - r.position[2]) * inverseAxis[2];
-		t2 = (b.max[2] - r.position[2]) * inverseAxis[2];
+		t1 = (b.min[2] - r.origin[2]) * inverseAxis[2];
+		t2 = (b.max[2] - r.origin[2]) * inverseAxis[2];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
@@ -221,29 +221,29 @@ namespace ez {
 		return false;
 	}
 	// Precompile templates
-	template bool intersect<float>(const Ray3d<float>& r, const AABB3d<float>& b, float& t);
-	template bool intersect<double>(const Ray3d<double>& r, const AABB3d<double>& b, double& t);
+	template bool intersect<float>(const Ray3<float>& r, const AABB3<float>& b, float& t);
+	template bool intersect<double>(const Ray3<double>& r, const AABB3<double>& b, double& t);
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const AABB3d<T>& b, glm::tvec3<T>& hit) {
+	bool intersect(const Ray3<T>& r, const AABB3<T>& b, glm::tvec3<T>& hit) {
 		T tmin = -std::numeric_limits<T>::max(), tmax = std::numeric_limits<T>::max();
 
 		glm::tvec3<T> inverseAxis = static_cast<T>(1) / r.axis;
 
-		T t1 = (b.min[0] - r.position[0]) * inverseAxis[0];
-		T t2 = (b.max[0] - r.position[0]) * inverseAxis[0];
+		T t1 = (b.min[0] - r.origin[0]) * inverseAxis[0];
+		T t2 = (b.max[0] - r.origin[0]) * inverseAxis[0];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
 
-		t1 = (b.min[1] - r.position[1]) * inverseAxis[1];
-		t2 = (b.max[1] - r.position[1]) * inverseAxis[1];
+		t1 = (b.min[1] - r.origin[1]) * inverseAxis[1];
+		t2 = (b.max[1] - r.origin[1]) * inverseAxis[1];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
 
-		t1 = (b.min[2] - r.position[2]) * inverseAxis[2];
-		t2 = (b.max[2] - r.position[2]) * inverseAxis[2];
+		t1 = (b.min[2] - r.origin[2]) * inverseAxis[2];
+		t2 = (b.max[2] - r.origin[2]) * inverseAxis[2];
 
 		tmin = std::max(tmin, std::min(t1, t2));
 		tmax = std::min(tmax, std::max(t1, t2));
@@ -260,13 +260,13 @@ namespace ez {
 		return false;
 	}
 	// Precompile templates
-	template bool intersect<float>(const Ray3d<float>& r, const AABB3d<float>& b, glm::tvec3<float>& t);
-	template bool intersect<double>(const Ray3d<double>& r, const AABB3d<double>& b, glm::tvec3<double>& t);
+	template bool intersect<float>(const Ray3<float>& r, const AABB3<float>& b, glm::tvec3<float>& t);
+	template bool intersect<double>(const Ray3<double>& r, const AABB3<double>& b, glm::tvec3<double>& t);
 
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const Plane<T>& p) {
-		T numer = glm::dot(p.position, p.normal) - glm::dot(p.normal, r.position);
+	bool intersect(const Ray3<T>& r, const Plane3<T>& p) {
+		T numer = glm::dot(p.origin, p.normal) - glm::dot(p.normal, r.origin);
 		T denom = glm::dot(r.axis, p.normal);
 
 		if (std::abs(denom) > ez::epsilon<T>()) {
@@ -276,13 +276,13 @@ namespace ez {
 		return false;
 	}
 	// Precompile templates
-	template bool intersect<float>(const Ray3d<float>& r, const Plane<float>& p);
-	template bool intersect<double>(const Ray3d<double>& r, const Plane<double>& p);
+	template bool intersect<float>(const Ray3<float>& r, const Plane3<float>& p);
+	template bool intersect<double>(const Ray3<double>& r, const Plane3<double>& p);
 
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const Plane<T>&, T& t) {
-		T numer = glm::dot(p.position, p.normal) - glm::dot(p.normal, r.position);
+	bool intersect(const Ray3<T>& r, const Plane3<T>&, T& t) {
+		T numer = glm::dot(p.origin, p.normal) - glm::dot(p.normal, r.origin);
 		T denom = glm::dot(r.axis, p.normal);
 
 		if (std::abs(denom) > ez::epsilon<T>()) {
@@ -293,8 +293,8 @@ namespace ez {
 	}
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const Plane<T>&p, glm::tvec3<T>& hit) {
-		T numer = glm::dot(p.position, p.normal) - glm::dot(p.normal, r.position);
+	bool intersect(const Ray3<T>& r, const Plane3<T>&p, glm::tvec3<T>& hit) {
+		T numer = glm::dot(p.origin, p.normal) - glm::dot(p.normal, r.origin);
 		T denom = glm::dot(r.axis, p.normal);
 
 		if (std::abs(denom) > ez::epsilon<T>()) {
@@ -307,12 +307,12 @@ namespace ez {
 		}
 		return false;
 	}
-	template bool intersect<float>(const Ray3d<float>& r, const Plane<float>& p, glm::tvec3<float>& hit);
-	template bool intersect<double>(const Ray3d<double>& r, const Plane<double>& p, glm::tvec3<double>& hit);
+	template bool intersect<float>(const Ray3<float>& r, const Plane3<float>& p, glm::tvec3<float>& hit);
+	template bool intersect<double>(const Ray3<double>& r, const Plane3<double>& p, glm::tvec3<double>& hit);
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const Sphere<T>& s) {
-		glm::tvec3<T> L = r.position - s.position;
+	bool intersect(const Ray3<T>& r, const Sphere<T>& s) {
+		glm::tvec3<T> L = r.origin - s.origin;
 		T a = glm::dot(r.axis, r.axis);
 		T b = static_cast<T>(2) * glm::dot(r.axis, L);
 		T c = glm::dot(L, L) - s.radius * s.radius;
@@ -321,12 +321,12 @@ namespace ez {
 
 		return D >= static_cast<T>(0);
 	}
-	template bool intersect<float>(const Ray3d<float>& r, const Sphere<float>& s);
-	template bool intersect<double>(const Ray3d<double>& r, const Sphere<double>& s);
+	template bool intersect<float>(const Ray3<float>& r, const Sphere<float>& s);
+	template bool intersect<double>(const Ray3<double>& r, const Sphere<double>& s);
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const Sphere<T>& s, T& t) {
-		glm::tvec3<T> L = r.position - s.position;
+	bool intersect(const Ray3<T>& r, const Sphere<T>& s, T& t) {
+		glm::tvec3<T> L = r.origin - s.origin;
 		T a = glm::dot(r.axis, r.axis);
 		T b = static_cast<T>(2) * glm::dot(r.axis, L);
 		T c = glm::dot(L, L) - s.radius * s.radius;
@@ -352,12 +352,12 @@ namespace ez {
 
 		return false;
 	}
-	template bool intersect<float>(const Ray3d<float>& r, const Sphere<float>& s, float& t);
-	template bool intersect<double>(const Ray3d<double>& r, const Sphere<double>& s, double& t);
+	template bool intersect<float>(const Ray3<float>& r, const Sphere<float>& s, float& t);
+	template bool intersect<double>(const Ray3<double>& r, const Sphere<double>& s, double& t);
 
 	template<typename T>
-	bool intersect(const Ray3d<T>& r, const Sphere<T>& s, glm::tvec3<T>& hit) {
-		glm::tvec3<T> L = r.position - s.position;
+	bool intersect(const Ray3<T>& r, const Sphere<T>& s, glm::tvec3<T>& hit) {
+		glm::tvec3<T> L = r.origin - s.origin;
 		T a = glm::dot(r.axis, r.axis);
 		T b = static_cast<T>(2) * glm::dot(r.axis, L);
 		T c = glm::dot(L, L) - s.radius * s.radius;
@@ -383,6 +383,6 @@ namespace ez {
 
 		return false;
 	}
-	template bool intersect<float>(const Ray3d<float>& r, const Sphere<float>& s, glm::tvec3<float>& hit);
-	template bool intersect<double>(const Ray3d<double>& r, const Sphere<double>& s, glm::tvec3<double>& hit);
+	template bool intersect<float>(const Ray3<float>& r, const Sphere<float>& s, glm::tvec3<float>& hit);
+	template bool intersect<double>(const Ray3<double>& r, const Sphere<double>& s, glm::tvec3<double>& hit);
 };

@@ -63,13 +63,6 @@ namespace ez {
 			++output;
 		}
 
-		namespace intern {
-			template<typename T>
-			T circleArcApprox(T D1, T D2) {
-				return D2 + (D2 - D1) * static_cast<T>(0.3333333333333333333333333333333333333333333);
-			}
-		};
-
 		// Function for finding the cusp on a cubic curve, if it exists.
 		template<typename T>
 		bool findCusp(const glm::vec<2, T>& p0, const glm::vec<2, T>& p1, const glm::vec<2, T>& p2, const glm::vec<2, T>& p3, T& out) {
