@@ -3,9 +3,11 @@
 #include <glm/mat4x4.hpp>
 #include <glm/mat3x3.hpp>
 #include <glm/vec2.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <ez/math/Complex.hpp>
 #include "Ray.hpp"
-#include "Orientation.hpp"
+
 
 namespace ez {
 	template<typename T, int N>
@@ -202,7 +204,7 @@ namespace ez {
 		using vec3_t = glm::tvec3<T>;
 		using quat_t = glm::tquat<T>;
 
-		Transform(const vec3_t& p = vec3_t{}, const quat_t& q = quat_t{})
+		Transform(const vec3_t& p = vec3_t{0.0}, const quat_t& q = quat_t{1.0, 0.0, 0.0, 0.0})
 			: origin(p)
 			, rotation(q)
 		{}
@@ -219,20 +221,26 @@ namespace ez {
 			origin = pos;
 		}
 		void rotate(const quat_t& localQuat) {
-			rotation.rotate(localQuat);
+			rotation = rotation * localQuat;
 		}
 		void rotate(T angle, const vec3_t& axis) {
-			rotation.rotate(angle, axis);
+			rotate(glm::angleAxis(angle, axis));
 		}
 		void rotate(const vec3_t& from, const vec3_t& to) {
-			rotation.rotate(from, to);
+			rotate(glm::rotation(from, to));
 		}
 
-		void setLocation(const vec3_t& pos) {
+		void setOrigin(const vec3_t& pos) {
 			origin = pos;
 		}
 		void setRotation(const quat_t& orient) {
-			rotation.setRotation(orient);
+			rotation = orient;
+		}
+		void setRotation(T angle, const vec3_t& axis) {
+			rotation = glm::angleAxis(angle, axis);
+		}
+		void setRotation(const vec3_t& from, const vec3_t& to) {
+			rotation = glm::rotation(from, to);
 		}
 
 		void reset() {
@@ -245,78 +253,60 @@ namespace ez {
 
 		// All align methods take normalized vectors
 		void alignLook(const vec3_t& normVec) {
-			rotation.alignLook(normVec);
+			rotation = glm::quatLookAtLH(normVec, getUpVec());
 		}
 		void alignRight(const vec3_t& normVec) {
-			rotation.alignRight(normVec);
+			glm::vec3 look = getLookVec();
+			glm::vec3 up = glm::cross(normVec, look);
+			rotation = glm::quatLookAtLH(look, up);
 		}
 		void alignUp(const vec3_t& normVec) {
-			rotation.alignUp(normVec);
+			rotation = glm::quatLookAtLH(getLookVec(), normVec);
 		}
 
 		void alignLocalX(const vec3_t& normVec) {
-			rotation.alignLocalX(normVec);
+			alignRight(normVec);
 		}
 		void alignLocalY(const vec3_t& normVec) {
-			rotation.alignLocalY(normVec);
+			alignUp(normVec);
 		}
 		void alignLocalZ(const vec3_t& normVec) {
-			rotation.alignLocalZ(normVec);
-		}
-		void alignLocalZY(const vec3_t& zVec, const vec3_t& yVec) {
-			rotation.alignLocalZY(zVec, yVec);
-		}
-		void alignLocalZX(const vec3_t& zVec, const vec3_t& xVec) {
-			rotation.alignLocalZX(zVec, xVec);
-		}
-		void alignLocalYZ(const vec3_t& yVec, const vec3_t& zVec) {
-			rotation.alignLocalYZ(yVec, zVec);
-		}
-		void alignLocalYX(const vec3_t& yVec, const vec3_t& xVec) {
-			rotation.alignLocalYX(yVec, xVec);
-		}
-		void alignLocalXZ(const vec3_t& xVec, const vec3_t& zVec) {
-			rotation.alignLocalXZ(xVec, zVec);
-		}
-		void alignLocalXY(const vec3_t& xVec, const vec3_t& yVec) {
-			rotation.alignLocalXY(xVec, yVec);
+			alignLook(normVec);
 		}
 
-		void lookAt(const vec3_t& focus, const vec3_t& up) {
-			glm::vec3 lookDir = glm::normalize(focus - getLocation());
-
-			alignLocalZY(lookDir, up);
+		void lookAt(const vec3_t& lookDir, const vec3_t& upDir) {
+			rotation = glm::quatLookAtLH(lookDir, upDir);
 		}
 
 		vec3_t getUpVec() const {
-			return rotation.getUpVec();
+			return glm::rotate(rotation, vec3_t{ 0, 1, 0 });
 		}
 		vec3_t getRightVec() const {
-			return rotation.getRightVec();
+			return glm::rotate(rotation, vec3_t{ 1, 0, 0 });
 		}
 		vec3_t getLookVec() const {
-			return rotation.getLookVec();
+			return glm::rotate(rotation, vec3_t{ 0, 0, 1 });
 		}
 
 		vec3_t getLocalY() const {
-			return rotation.getLocalY();
+			return getUpVec();
 		}
 		vec3_t getLocalX() const {
-			return rotation.getLocalX();
+			return getRightVec();
 		}
 		vec3_t getLocalZ() const {
-			return rotation.getLocalZ();
+			return getLookVec();
 		}
 
 		glm::tmat3x3<T> getBasis() const {
-			return rotation.getBasis();
+			return glm::mat3_cast(rotation);
 		}
 		glm::tmat4x4<T> getMatrix() const {
-			glm::tmat4x4<T> ret;
+			glm::tmat4x4<T> ret = glm::mat4_cast(rotation);
 
-			ret[0] = glm::tvec4<T>(getLocalX(), 0.0);
-			ret[1] = glm::tvec4<T>(getLocalY(), 0.0);
-			ret[2] = glm::tvec4<T>(getLocalZ(), 0.0);
+			//ret[0] = glm::tvec4<T>(getLocalX(), 0.0);
+			//ret[1] = glm::tvec4<T>(getLocalY(), 0.0);
+			//ret[2] = glm::tvec4<T>(getLocalZ(), 0.0);
 
 			ret[3] = glm::tvec4<T>(getLocation(), 1.0);
 			return ret;
@@ -357,24 +347,24 @@ namespace ez {
 			return origin;
 		}
 		const quat_t& getRotation() const {
-			return rotation.getRotation();
+			return rotation;
 		}
 
 		vec3_t toLocal(const vec3_t& point) const {
 			vec3_t modelCoordinate = point - getLocation();
-			modelCoordinate = glm::rotate(glm::inverse(getRotation()), modelCoordinate);
+			modelCoordinate = glm::rotate(glm::inverse(rotation), modelCoordinate);
 			return modelCoordinate;
 		}
 		vec3_t toWorld(const vec3_t& point) const {
-			vec3_t worldCoordinate = glm::rotate(getRotation(), point);
+			vec3_t worldCoordinate = glm::rotate(rotation, point);
 			worldCoordinate += getLocation();
 			return worldCoordinate;
 		}
 		vec3_t toLocalRotation(const vec3_t& axis) const {
-			return rotation.toLocalRotation(axis);
+			return glm::rotate(glm::inverse(rotation), axis);
 		}
 		vec3_t toWorldRotation(const vec3_t& axis) const {
-			return rotation.toWorldRotation(axis);
+			return glm::rotate(rotation, axis);
 		}
 		Transform toLocal(const Transform& form) const {
 			Transform ret;
@@ -403,7 +393,7 @@ namespace ez {
 		}
 
 		vec3_t origin;
-		Orientation<T> rotation;
+		quat_t rotation;
 	};
 
 	template<typename T>
