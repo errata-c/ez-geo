@@ -1,6 +1,6 @@
 #pragma once
 #include <glm/vec2.hpp>
-#include <ez/math/MathConstants.hpp>
+#include <ez/math/constants.hpp>
 
 namespace ez {
 	// Generic line segment

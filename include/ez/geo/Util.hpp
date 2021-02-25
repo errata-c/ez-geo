@@ -1,6 +1,6 @@
 #pragma once
 #include <ez/math/MathConstants.hpp>
-#include <ez/math/Complex.hpp>
+#include <ez/math/complex.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/vec3.hpp>
@@ -52,32 +52,5 @@ namespace ez {
 			}
 			return rot;
 		};
-		template<typename T>
-		ez::Complex<T> makeRotation(const glm::tvec2<T>& from, const glm::tvec2<T>& to) noexcept {
-			ez::Complex<T> r0{ from.x, from.y }, r1{ to.x, to.y };
-			return r0.reverseRotate(r1);
-		};
-
-		template<typename T>
-		void rotate(glm::tvec3<T>& val, const glm::tvec3<T>& axis, T angle) noexcept {
-			glm::tquat<T> rot = glm::angleAxis(angle, axis);
-			return rotate(val, rot);
-		};
-		template<typename T>
-		void rotate(glm::tvec3<T>& val, const glm::tquat<T>& rot) noexcept {
-			val = glm::rotate(val, rot);
-		};
-
-		template<typename T>
-		void rotate(glm::tvec2<T>& val, T angle) noexcept {
-			ez::Complex<T> rot = ez::Complex<T>::fromPolar(angle);
-			val = rot.rotate(val);
-		};
-		template<typename T>
-		void rotate(glm::tvec2<T>& val, const ez::Complex<T>& rot) noexcept {
-			val = rot.rotate(val);
-		}
-
-
 	};
 };

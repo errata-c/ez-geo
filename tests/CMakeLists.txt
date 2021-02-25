@@ -16,7 +16,6 @@ target_link_libraries(test_framework INTERFACE fmt::fmt ez::geo ez::window ez::i
 target_compile_features(test_framework INTERFACE cxx_std_17)
 
 add_subdirectory("basic")
-add_subdirectory("bezier")
 add_subdirectory("ex")
 
 #add_executable(bezier_multi_test "bezier/multi/multi.cpp")

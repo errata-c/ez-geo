@@ -1,7 +1,7 @@
 #pragma once
 #include <type_traits>
 #include <glm/vec3.hpp>
-#include <ez/math/Complex.hpp>
+#include <ez/math/complex.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
@@ -47,15 +47,14 @@ namespace ez {
 
 		template<typename = std::enable_if_t<N == 2>>
 		void rotate(T angle) noexcept {
-			glm::quat rot = glm::angleAxis(angle, axis);
+			glm::tcomplex<T> rot = glm::polar(angle);
 			Plane::rotate(rot);
 		};
 		template<typename = std::enable_if_t<N == 2>>
-		void rotate(const ez::Complex<T>& rot) noexcept {
+		void rotate(const glm::tcomplex<T>& rot) noexcept {
 			normal = rot.rotate(normal);
 		};
 
-		// Dont know if I like this...
 		bool isFacing(const vec_t& p) const {
 			T det = glm::dot(normal, p - origin);
 			return det >= 0.f;
