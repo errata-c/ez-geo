@@ -1,6 +1,9 @@
 #pragma once
 #include <glm/common.hpp>
+#include <glm/gtc/vec1.hpp>
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <algorithm>
 
 namespace ez {
@@ -11,6 +14,10 @@ namespace ez {
 		using vec_t = glm::vec<N, T>;
 		static constexpr int components = N;
 		using rect_t = MMRect<T, N>;
+
+		static constexpr bool has_x = N >= 1;
+		static constexpr bool has_y = N >= 2;
+		static constexpr bool has_z = N >= 3;
 
 		MMRect() noexcept
 			: min{ static_cast<T>(0) }
@@ -33,9 +40,36 @@ namespace ez {
 		MMRect& operator=(const MMRect&) noexcept = default;
 		MMRect& operator=(MMRect&&) noexcept = default;
 
+		vec_t size() const noexcept {
+			return max - min;
+		}
+
+		template<typename = std::enable_if_t<has_x>>
+		T width() const noexcept {
+			return max[0] - min[0];
+		}
+
+		template<typename = std::enable_if_t<has_y>>
+		T height() const noexcept {
+			return max[1] - min[1];
+		}
+		template<typename = std::enable_if_t<N == 2>>
+		T area() const noexcept {
+			return width() * height();
+		}
+
+		template<typename = std::enable_if_t<has_z>>
+		T depth() const noexcept {
+			return max[2] - min[2];
+		}
+		template<typename = std::enable_if_t<N == 3>>
+		T volume() const noexcept {
+			return width() * height() * depth();
+		}
+
 		vec_t center() const noexcept {
 			// Divide by two instead of multiply by 0.5, since the T variable could be an integer type.
-			return (minimum() + maximum()) / static_cast<T>(2);
+			return (min + max) / T(2);
 		};
 
 		void translate(const vec_t& offset) noexcept {
