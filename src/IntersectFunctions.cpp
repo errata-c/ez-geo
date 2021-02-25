@@ -10,8 +10,8 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#include <ez/math/MathConstants.hpp>
-#include <ez/math/Polynomial.hpp>
+#include <ez/math/constants.hpp>
+#include <ez/math/poly.hpp>
 
 namespace ez {
 	template<typename T>
@@ -332,7 +332,7 @@ namespace ez {
 		T c = glm::dot(L, L) - s.radius * s.radius;
 
 		T roots[2];
-		int count = ez::Polynomial::solveQuadratic<T>(a, b, c, roots);
+		int count = ez::poly::solveQuadratic<T>(a, b, c, roots);
 
 		if (count == 2) {
 			T closest = std::min(roots[0], roots[1]);
@@ -363,7 +363,7 @@ namespace ez {
 		T c = glm::dot(L, L) - s.radius * s.radius;
 
 		T roots[2];
-		int count = ez::Polynomial::solveQuadratic<T>(a, b, c, roots);
+		int count = ez::poly::solveQuadratic<T>(a, b, c, roots);
 
 		if (count == 2) {
 			T closest = std::min(roots[0], roots[1]);

@@ -1,5 +1,5 @@
 #pragma once
-#include <ez/math/MathConstants.hpp>
+#include <ez/math/constants.hpp>
 #include <glm/common.hpp>
 #include <glm/vec2.hpp>
 #include <algorithm>

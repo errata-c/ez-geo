@@ -1,7 +1,7 @@
 #pragma once
 #include <type_traits>
-#include <ez/math/MathConstants.hpp>
-#include <ez/math/Complex.hpp>
+#include <ez/math/constants.hpp>
+#include <ez/math/complex.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -43,11 +43,11 @@ namespace ez {
 		
 		template<typename = std::enable_if_t<N == 2>>
 		void rotate(T angle) {
-			ez::Complex<T> rot = ez::Complex<T>::fromPolar(angle);
+			glm::tcomplex<T> rot = glm::polar(angle);
 			Ray::rotate(rot);
 		};
 		template<typename = std::enable_if_t<N == 2>>
-		void rotate(const ez::Complex<T>& rot) {
+		void rotate(const glm::tcomplex<T>& rot) {
 			axis = rot.rotate(axis);
 		};
 
