@@ -4,11 +4,10 @@ project(EZ_GEO
 VERSION 0.4.0
 LANGUAGES C CXX)
 
+option(BUILD_TESTS "Build the test executables" ON)
+
 # TODO:
-#	Consider separating the intersections functions into a separate library
 #	Update the structures to have a consistent api
-#	Bezier functions are getting excessive, maybe should be a separate lib as well
-#	
 
 include(GNUInstallDirs)
 find_package(ez-cmake CONFIG REQUIRED)
@@ -46,7 +45,7 @@ set_target_properties(ez-geo PROPERTIES EXPORT_NAME "geo")
 add_library(ez::geo ALIAS "ez-geo")
 
 if(${BUILD_TESTS})
-	#add_subdirectory("tests")
+	add_subdirectory("tests")
 endif()
 
 

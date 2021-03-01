@@ -15,6 +15,10 @@ namespace ez {
 		using vec_t = glm::vec<N, T>;
 		static constexpr int components = N;
 
+		static constexpr bool has_x = N >= 1;
+		static constexpr bool has_y = N >= 2;
+		static constexpr bool has_z = N >= 3;
+
 		Rect() noexcept
 			: origin{static_cast<T>(0)}
 			, size{static_cast<T>(0)}
@@ -35,6 +39,29 @@ namespace ez {
 		Rect(Rect&&) noexcept = default;
 		Rect& operator=(const Rect&) noexcept = default;
 		Rect& operator=(Rect&&) noexcept = default;
+
+		template<typename = std::enable_if_t<has_x>>
+		T width() const noexcept {
+			return max[0] - min[0];
+		}
+
+		template<typename = std::enable_if_t<has_y>>
+		T height() const noexcept {
+			return max[1] - min[1];
+		}
+		template<typename = std::enable_if_t<N == 2>>
+		T area() const noexcept {
+			return width() * height();
+		}
+
+		template<typename = std::enable_if_t<has_z>>
+		T depth() const noexcept {
+			return max[2] - min[2];
+		}
+		template<typename = std::enable_if_t<N == 3>>
+		T volume() const noexcept {
+			return width() * height() * depth();
+		}
 
 		vec_t center() const noexcept {
 			// Divide by two instead of multiply by 0.5, since the T variable could be an integer type.
@@ -205,4 +232,10 @@ namespace ez {
 
 		vec_t origin, size;
 	};
+
+	template<typename T>
+	using Rect2 = Rect<T, 2>;
+
+	template<typename T>
+	using Rect3 = Rect<T, 3>;
 };

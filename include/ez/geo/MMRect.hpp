@@ -40,10 +40,6 @@ namespace ez {
 		MMRect& operator=(const MMRect&) noexcept = default;
 		MMRect& operator=(MMRect&&) noexcept = default;
 
-		vec_t size() const noexcept {
-			return max - min;
-		}
-
 		template<typename = std::enable_if_t<has_x>>
 		T width() const noexcept {
 			return max[0] - min[0];
@@ -65,6 +61,10 @@ namespace ez {
 		template<typename = std::enable_if_t<N == 3>>
 		T volume() const noexcept {
 			return width() * height() * depth();
+		}
+
+		vec_t size() const noexcept {
+			return max - min;
 		}
 
 		vec_t center() const noexcept {
