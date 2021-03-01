@@ -6,7 +6,8 @@
 #include <fmt/ostream.h>
 #include <fmt/format.h>
 
-#include <ez/geo/Bezier.hpp>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 double f(double x) {
 	return std::sin(x);
