@@ -17,6 +17,7 @@ target_compile_features(test_framework INTERFACE cxx_std_17)
 
 add_subdirectory("basic")
 add_subdirectory("ex")
+add_subdirectory("color")
 
 #add_executable(bezier_multi_test "bezier/multi/multi.cpp")
 #target_include_directories(bezier_multi_test PRIVATE "bezier/multi")
