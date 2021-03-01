@@ -1,16 +1,19 @@
 #pragma once
 #include <glm/common.hpp>
-#include <glm/gtc/vec1.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <algorithm>
+#include <ez/math/constants.hpp>
 
 namespace ez {
 	// Define a MMRect, a rect with min max points in absolute coordinates instead of one absolute and one relative.
 	// Additionally the bounds of this rect a considered inclusive, meaning maximum point is inside the rect.
 	template<typename T, int N>
 	struct MMRect {
+		static_assert(N > 1, "ez::MMRect is not defined for dimensions less than two!");
+		static_assert(N <= 4, "ez::MMRect is no defined for dimensions greater than four!");
+
 		using vec_t = glm::vec<N, T>;
 		static constexpr int components = N;
 		using rect_t = MMRect<T, N>;
@@ -141,11 +144,15 @@ namespace ez {
 			return *this;
 		};
 
-		vec_t minimum() const noexcept {
-			return min;
+		rect_t merged(const rect_t& other) const noexcept {
+			rect_t copy = *this;
+			copy.merge(other);
+			return copy;
 		};
-		vec_t maximum() const noexcept {
-			return max;
+		rect_t merged(const vec_t& point) const noexcept {
+			rect_t copy = *this;
+			copy.merge(point);
+			return copy;
 		};
 
 		// This function always succeeds.
@@ -168,31 +175,99 @@ namespace ez {
 		};
 
 		template<typename F>
-		bool inBound(const glm::tvec2<F>& point) const noexcept {
-			// If statements to have early return like the normal boolean operators.
-			for (int i = 0; i < components; ++i) {
-				if (point[i] < min[i]) {
-					return false;
-				}
-				if (max[i] < point[i]) {
-					return false;
+		bool contains(const glm::tvec2<F>& point) const noexcept {
+			if constexpr (std::is_floating_point_v<T>) {
+				for (int i = 0; i < components; ++i) {
+					if ((point[i] - min[i]) < -ez::epsilon<T>()) {
+						return false;
+					}
+					if ((max[i] - point[i]) < -ez::epsilon<T>()) {
+						return false;
+					}
 				}
 			}
+			else {
+				for (int i = 0; i < components; ++i) {
+					if (min[i] > point[i]) {
+						return false;
+					}
+					if (max[i] <= point[i]) {
+						return false;
+					}
+				}
+			}
+			
 			return true;
 		};
 
-		bool inBound(const rect_t& other) const noexcept {
-			// If statements to have early return like the normal boolean operators.
-			for (int i = 0; i < components; ++i) {
-				if (max[i] > other.max[i]) {
-					return false;
-				}
-				if (min[i] < other.min[i]) {
-				return false;
+		bool contains(const rect_t& other) const noexcept {
+			if constexpr (std::is_floating_point_v<T>) {
+				for (int i = 0; i < components; ++i) {
+					if ((other.min[i] - min[i]) < -ez::epsilon<T>()) {
+						return false;
+					}
+					if ((max[i] - other.max[i]) < -ez::epsilon<T>()) {
+						return false;
+					}
 				}
 			}
+			else {
+				for (int i = 0; i < components; ++i) {
+					if (min[i] > other.min[i]) {
+						return false;
+					}
+					if (max[i] < other.max[i]) {
+						return false;
+					}
+				}
+			}
+			
 			return true;
 		};
+
+		bool operator==(const rect_t& other) const noexcept {
+			if constexpr (std::is_floating_point_v<T>) {
+				vec_t
+					tmin = glm::abs(min - other.min),
+					tmax = glm::abs(max - other.max);
+
+				for (int i = 0; i < components; ++i) {
+					if (tmin[i] > ez::epsilon<T>()) {
+						return false;
+					}
+					if (tmax[i] > ez::epsilon<T>()) {
+						return false;
+					}
+				}
+				return true;
+			}
+			else {
+				return
+					min == other.min &&
+					max == other.max;
+			}
+		}
+		bool operator!=(const rect_t& other) const noexcept {
+			if constexpr (std::is_floating_point_v<T>) {
+				vec_t
+					tmin = glm::abs(min - other.min),
+					tmax = glm::abs(max - other.max);
+				for (int i = 0; i < components; ++i) {
+					if (tmin[i] > ez::epsilon<T>()) {
+						return true;
+					}
+					if (tmax[i] > ez::epsilon<T>()) {
+						return true;
+					}
+				}
+				return false;
+			}
+			else {
+				return
+					min != other.min ||
+					max != other.max;
+			}
+		}
 
 		static rect_t between(const vec_t& p0, const vec_t& p1) noexcept {
 			rect_t tmp;

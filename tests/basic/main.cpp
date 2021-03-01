@@ -14,7 +14,6 @@
 #include <ez/geo/Rect.hpp>
 #include <ez/geo/Sphere.hpp>
 #include <ez/geo/Transform.hpp>
-#include <ez/geo/Bezier.hpp>
 
 static constexpr float epsf = 1e-4f;
 static constexpr double eps = 1e-6;
@@ -95,75 +94,49 @@ TEST_CASE("circle test", "[Circle]") {
 	}
 }
 
-TEST_CASE("bezier length test", "[Bezier]") {
-	// Length of this cubic bezier should be exactly 4
+// Test MMRect
+TEST_CASE("MMRect floating point") {
+	using Rect = ez::MMRect2<float>;
+	using IRect = ez::MMRect2<int>;
 
-	fmt::print("Begin length test\n");
-	std::array<glm::dvec2, 4>  d{
-		glm::dvec2{-1, -1},
-		glm::dvec2{-1, 1},
-		glm::dvec2{1, 1},
-		glm::dvec2{1, -1},
-	};
 
-	std::array<glm::vec2, 4>  f{
-		glm::vec2{-1, -1},
-		glm::vec2{-1, 1},
-		glm::vec2{1, 1},
-		glm::vec2{1, -1},
-	};
+	Rect rect0 = Rect::between(glm::vec2{0,0}, glm::vec2{100, 100});
+	Rect rect1 = Rect::between(glm::vec2{50, 50}, glm::vec2{100, 100});
+	Rect rect2 = Rect::between(glm::vec2{50, 50}, glm::vec2{200, 200});
 
-	float flen = 4.f;
-	double dlen = 4.0;
+	REQUIRE(rect0.merged(rect1) == rect0);
+	REQUIRE(rect2.contains(rect1));
 
-	{
-		float len = ez::Bezier::length(f[0], f[1], f[2], f[3]);
-		fmt::print("Single precision flatten length: {}\n", flen);
-		fmt::print("Single precision ez:Bezier::length: {}\n", len);
-		REQUIRE(approxEq(flen, len));
-	}
+	REQUIRE(rect0.contains(glm::vec2{0,0}));
+	REQUIRE(rect0.contains(glm::vec2{100, 100}));
 
-	{
-		double len = ez::Bezier::length(d[0], d[1], d[2], d[3]);
-		fmt::print("Double precision flatten length: {}\n", dlen);
-		fmt::print("Double precision ez:Bezier::length: {}\n", len);
-		REQUIRE(approxEq(dlen, len));
-	}
-
-	fmt::print("End length test\n\n");
+	Rect rect3 = rect0.merged(rect2);
+	REQUIRE(rect3.contains(rect0));
+	REQUIRE(rect3.contains(rect2));
+	REQUIRE(rect3.contains(rect1));
 }
 
-TEST_CASE("bezier interpolate test", "[Bezier]") {
-	std::array<glm::dvec2, 4>  d{
-		glm::dvec2{-1, -1},
-		glm::dvec2{-1, 1},
-		glm::dvec2{1, 1},
-		glm::dvec2{1, -1},
-	};
+TEST_CASE("MMRect integer") {
+	using Rect = ez::MMRect2<int>;
 
-	glm::dvec2 p0 = ez::Bezier::interpolate<1>(d.begin(), 0.5);
+	Rect rect0 = Rect::between(glm::ivec2{ 0,0 }, glm::ivec2{ 100, 100 });
+	Rect rect1 = Rect::between(glm::ivec2{ 50, 50 }, glm::ivec2{ 100, 100 });
+	Rect rect2 = Rect::between(glm::ivec2{ 50, 50 }, glm::ivec2{ 200, 200 });
 
-	glm::dvec2 p1 = ez::Bezier::interpolate<2>(d.begin(), 0.5);
+	REQUIRE(rect0.merged(rect1) == rect0);
+	REQUIRE(rect2.contains(rect1));
 
-	glm::dvec2 p2 = ez::Bezier::interpolate<3>(d.begin(), 0.5);
+	REQUIRE(rect0.contains(rect0.min));
+	REQUIRE(rect0.contains(glm::ivec2{ 99, 99 }));
+	REQUIRE_FALSE(rect0.contains(rect0.max));
 
-	glm::dvec2 p3 = ez::Bezier::interpolate<4>(d.begin(), 0.5);
-
-	glm::dvec2 res0, res1, res2, res3;
-	res0 = d[0];
-	res1 = (d[0] + d[1]) * 0.5;
-	glm::dvec2 i0 = (d[1] + d[2]) * 0.5;
-	res2 = (i0 + res1) * 0.5;
-	glm::dvec2 i1 = (d[2] + d[3]) * 0.5;
-	glm::dvec2 i2 = (i0 + i1) * 0.5;
-	res3 = (res2 + i2) * 0.5;
-
-	REQUIRE(approxEq(p0, res0));
-	REQUIRE(approxEq(p1, res1));
-	REQUIRE(approxEq(p2, res2));
-	REQUIRE(approxEq(p3, res3));
+	Rect rect3 = rect0.merged(rect2);
+	REQUIRE(rect3.contains(rect0));
+	REQUIRE(rect3.contains(rect2));
+	REQUIRE(rect3.contains(rect1));
 }
 
-// Test Line2d
-// Test Line3d
-// Test Orientation
+// Test Line
+
+
+// Test Transform
