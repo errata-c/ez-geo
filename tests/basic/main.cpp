@@ -8,7 +8,6 @@
 #include <ez/geo/AABB.hpp>
 #include <ez/geo/Circle.hpp>
 #include <ez/geo/Line.hpp>
-#include <ez/geo/Orientation.hpp>
 #include <ez/geo/Plane.hpp>
 #include <ez/geo/Ray.hpp>
 #include <ez/geo/Rect.hpp>
