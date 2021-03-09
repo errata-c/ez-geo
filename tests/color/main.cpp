@@ -8,6 +8,8 @@
 #include <ez/geo/Color.hpp>
 
 TEST_CASE("u8 color") {
+	glm::tvec4<uint8_t> testvec;
+
 	using Color = ez::ColorU;
 
 	REQUIRE(Color{} == Color{ 0, 0, 0, 255 });

@@ -76,7 +76,7 @@ namespace ez {
 			return glm::length(op - glm::dot(op, axis) * axis);
 		};
 
-		template<std::enable_if_t<N == 3, int> = 0>
+		template<typename = std::enable_if_t<N == 3>>
 		vec_t nearestPointTo(const Ray& r) const {
 			vec_t n2 = glm::cross(r.getAxis(), glm::cross(axis, r.getAxis()));
 
@@ -90,7 +90,7 @@ namespace ez {
 				return eval(numer / denom);
 			}
 		};
-		template<std::enable_if_t<N == 3, int> = 0>
+		template<typename = std::enable_if_t<N == 3>>
 		vec_t nearestPointFrom(const Ray& r) const {
 			vec_t n1 = glm::cross(axis, glm::cross(r.getAxis(), axis));
 
@@ -105,7 +105,7 @@ namespace ez {
 			}
 		};
 
-		template<std::enable_if_t<N == 3, int> = 0>
+		template<typename = std::enable_if_t<N == 3>>
 		vec_t nearestPointTo(const Ray& r, T& t) const {
 			vec_t n2 = glm::cross(r.getAxis(), glm::cross(axis, r.getAxis()));
 
@@ -120,7 +120,7 @@ namespace ez {
 				return eval(t);
 			}
 		};
-		template<std::enable_if_t<N == 3, int> = 0>
+		template<typename = std::enable_if_t<N == 3>>
 		vec_t nearestPointFrom(const Ray& r, T& t) const {
 			vec_t n1 = glm::cross(axis, glm::cross(r.getAxis(), axis));
 
