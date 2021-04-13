@@ -1,5 +1,5 @@
 
-if(NOT TARGET glm)
+if(NOT TARGET glm::glm)
 	find_dependency(glm CONFIG)
 endif()
 

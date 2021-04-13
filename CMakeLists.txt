@@ -5,6 +5,7 @@ VERSION 0.4.0
 LANGUAGES C CXX)
 
 option(BUILD_TESTS "Build the test executables" ON)
+option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
 
 # TODO:
 #	Update the structures to have a consistent api
@@ -31,7 +32,7 @@ target_include_directories(ez-geo PUBLIC
 target_compile_features(ez-geo PUBLIC cxx_std_17)
 
 target_link_libraries(ez-geo 
-PUBLIC glm ez::math
+	PUBLIC glm::glm ez::math
 )
 
 target_compile_definitions(ez-geo PRIVATE
@@ -39,8 +40,6 @@ target_compile_definitions(ez-geo PRIVATE
 	"GLM_ENABLE_EXPERIMENTAL"
 	"$<$<PLATFORM_ID:Windows>:NOMINMAX>"
 )
-#target_compile_options(ez-geo PRIVATE "$<BUILD_INTERFACE:$<$<CXX_COMPILER_ID:MSVC>:/permissive->>")
-
 set_target_properties(ez-geo PROPERTIES EXPORT_NAME "geo")
 add_library(ez::geo ALIAS "ez-geo")
 
@@ -48,8 +47,9 @@ if(${BUILD_TESTS})
 	add_subdirectory("tests")
 endif()
 
-
-set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/ez-geo)
+if(SEPARATE_DIRECTORY)
+	set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/ez-geo)
+endif()
 
 install(
 	DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"

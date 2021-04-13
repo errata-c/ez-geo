@@ -20,4 +20,3 @@ target_compile_features(test_framework INTERFACE cxx_std_17)
 
 add_subdirectory("basic")
 add_subdirectory("ex")
-add_subdirectory("color")
