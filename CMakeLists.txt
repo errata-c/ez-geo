@@ -4,18 +4,14 @@ project(EZ_GEO
 VERSION 0.4.0
 LANGUAGES C CXX)
 
+include(GNUInstallDirs)
+include("cmake/ez-cmake/install-package.cmake")
+
 option(BUILD_TESTS "Build the test executables" ON)
 option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
+set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/ez-geo" CACHE STRING "The relative directory to install package config files.")
 
-# TODO:
-#	Update the structures to have a consistent api
 
-include(GNUInstallDirs)
-include("cmake/ez-cmake/install_package.cmake")
-
-set(PACK_NAME "ez-geo")
-set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PACK_NAME}" CACHE STRING "The relative directory to install ${PACK_NAME} package config files.")
-set(BUILD_TESTS OFF CACHE BOOL "Build the tests for ${PACK_NAME} library.")
 
 find_package(ez-math CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
