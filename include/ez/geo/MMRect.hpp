@@ -82,7 +82,7 @@ namespace ez {
 		void centerTo(const vec_t& point) noexcept {
 			translate(point - center());
 		};
-
+		
 		void expand(const T& amount) noexcept {
 			min -= amount;
 			max += amount;
@@ -90,6 +90,10 @@ namespace ez {
 		void expand(const vec_t& amount) noexcept {
 			min -= amount;
 			max += amount;
+		};
+		void expand(const vec_t& minv, const vec_t & maxv) noexcept {
+			min -= minv;
+			max += maxv;
 		};
 
 		void shrink(const T& amount) noexcept {
@@ -102,6 +106,13 @@ namespace ez {
 		void shrink(const vec_t& amount) noexcept {
 			min += amount;
 			max -= amount;
+			vec_t c = center();
+			min = glm::max(c, min);
+			max = glm::min(c, max);
+		};
+		void shrink(const vec_t& minv, const vec_t& maxv) noexcept {
+			min += minv;
+			max -= maxv;
 			vec_t c = center();
 			min = glm::max(c, min);
 			max = glm::min(c, max);

@@ -11,7 +11,7 @@ option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
 #	Update the structures to have a consistent api
 
 include(GNUInstallDirs)
-find_package(ez-cmake CONFIG REQUIRED)
+include("cmake/ez-cmake/install_package.cmake")
 
 set(PACK_NAME "ez-geo")
 set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/${PACK_NAME}" CACHE STRING "The relative directory to install ${PACK_NAME} package config files.")
@@ -43,7 +43,7 @@ target_compile_definitions(ez-geo PRIVATE
 set_target_properties(ez-geo PROPERTIES EXPORT_NAME "geo")
 add_library(ez::geo ALIAS "ez-geo")
 
-if(${BUILD_TESTS})
+if(BUILD_TESTS)
 	add_subdirectory("tests")
 endif()
 
@@ -72,5 +72,5 @@ install_package(
 	VERSION "${EZ_GEO_VERSION}"
 	COMPATIBILITY "SameMajorVersion"
 	DESTINATION "${CONFIG_DIR}"
-	PRECONFIG "${CMAKE_CURRENT_SOURCE_DIR}/preconfig.cmake"
+	PRECONFIG "cmake/preconfig.cmake"
 )
