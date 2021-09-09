@@ -1,24 +1,21 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.16)
 
 project(EZ_GEO
-VERSION 0.4.0
-LANGUAGES C CXX)
+	VERSION 0.4.0
+	LANGUAGES C CXX
+)
 
-include(GNUInstallDirs)
 include(FetchContent)
 
 FetchContent_Declare(
 	ez-cmake
 	GIT_REPOSITORY "https://github.com/errata-c/ez-cmake.git"
-	GIT_TAG "c174cbd947278d4dd8e2f7d7f3c3499cd0b7f5ad"
+	GIT_TAG "main"
 )
 FetchContent_MakeAvailable(ez-cmake)
 
-option(BUILD_TESTS "Build the test executables" ON)
-option(SEPARATE_DIRECTORY "Install the package into its own directory" ON)
-set(CONFIG_DIR "${CMAKE_INSTALL_DATAROOTDIR}/ez-geo" CACHE STRING "The relative directory to install package config files.")
-
-
+option(EZ_GEO_BUILD_TESTS "Build the test executables" ON)
+set(EZ_GEO_CONFIG_DIR "share/ez-geo" CACHE STRING "The relative directory to install package config files.")
 
 find_package(ez-math CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
@@ -29,13 +26,14 @@ add_library(ez-geo STATIC
 
 target_include_directories(ez-geo PUBLIC 
 	"$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+	"$<INSTALL_INTERFACE:include>"
 )
 
 target_compile_features(ez-geo PUBLIC cxx_std_17)
 
-target_link_libraries(ez-geo 
-	PUBLIC glm::glm ez::math
+target_link_libraries(ez-geo PUBLIC
+	glm::glm
+	ez::math
 )
 
 target_compile_definitions(ez-geo PRIVATE
@@ -46,12 +44,8 @@ target_compile_definitions(ez-geo PRIVATE
 set_target_properties(ez-geo PROPERTIES EXPORT_NAME "geo")
 add_library(ez::geo ALIAS "ez-geo")
 
-if(BUILD_TESTS)
+if(EZ_GEO_BUILD_TESTS)
 	add_subdirectory("tests")
-endif()
-
-if(SEPARATE_DIRECTORY)
-	set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/ez-geo)
 endif()
 
 install(
@@ -63,9 +57,9 @@ install(
 
 install(TARGETS ez-geo
 	EXPORT ez-geo-targets
-	RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}/$<CONFIG>"
-	ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/$<CONFIG>"
-	LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/$<CONFIG>"
+	RUNTIME DESTINATION "bin/$<CONFIG>"
+	ARCHIVE DESTINATION "lib/$<CONFIG>"
+	LIBRARY DESTINATION "lib/$<CONFIG>"
 )
 
 install_package(
@@ -74,6 +68,6 @@ install_package(
 	EXPORT "ez-geo-targets"
 	VERSION "${EZ_GEO_VERSION}"
 	COMPATIBILITY "SameMajorVersion"
-	DESTINATION "${CONFIG_DIR}"
+	DESTINATION "${EZ_GEO_CONFIG_DIR}"
 	PRECONFIG "cmake/preconfig.cmake"
 )
