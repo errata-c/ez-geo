@@ -21,7 +21,7 @@ find_package(ez-math CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
 add_library(ez-geo STATIC
-"src/IntersectFunctions.cpp"
+	"src/IntersectFunctions.cpp"
 )
 
 target_include_directories(ez-geo PUBLIC 

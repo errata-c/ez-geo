@@ -5,7 +5,7 @@
 namespace ez {
 	/*
 	Non-skewed transformation, follows opengl coordinate system for 3d. 
-	This means y is up, z is the look direction, x is right.
+	Left handed coordinates, y is up, x is right, and z is forward.
 	*/
 	template<typename T, int N>
 	struct Transform {
