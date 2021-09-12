@@ -43,37 +43,68 @@ namespace ez {
 			return trait_t::world[2];
 		}
 
-		void rotate(const rot_t & amount) noexcept {
-			rotation = rotation * amount;
-		}
+		// A world space rotation that does not affect the origin
 		template<typename = std::enable_if_t<N == 2>>
-		void rotate(T amount) noexcept {
-			rotation = glm::polar(amount) * rotation;
+		Transform& rotate(const std::complex<T>& amount) noexcept {
+			rotation = rotation * amount;
+			return *this;
 		}
+
+		//  A world space rotation that does not affect the origin
 		template<typename = std::enable_if_t<N == 3>>
-		void rotate(T angle, const vec_t& axis) noexcept {
+		Transform& rotate(const glm::qua<T>& amount) noexcept {
+			// This is the 3d quaternion rotation, simple quaternion multiplication performs local space rotation.
+			// We just swap the ordering
+			rotation = amount * rotation;
+			return *this;
+		}
+
+		// A world space rotation that does not affect the origin
+		// Clockwise
+		template<typename = std::enable_if_t<N == 2>>
+		Transform& rotate(T amount) noexcept {
+			rotation = glm::polar(-amount) * rotation;
+			return *this;
+		}
+		// A local rotation that does not affect the origin
+		// Clockwise around the axis
+		template<typename = std::enable_if_t<N == 3>>
+		Transform& rotate(T angle, const vec_t& axis) noexcept {
 			rotate(glm::angleAxis(angle, axis));
+			return *this;
 		}
+		// A local rotation that does not affect the origin
 		template<typename = std::enable_if_t<N == 3>>
-		void rotate(const vec_t& from, const vec_t& to) noexcept {
+		Transform& rotate(const vec_t& from, const vec_t& to) noexcept {
 			rotate(glm::rotation(from, to));
+			return *this;
 		}
 
-		void translate(vec_t off) noexcept {
+		// A local translation that is not affected by the scale or rotation.
+		Transform& translate(vec_t off) noexcept {
 			origin += off;
+			return *this;
 		}
-		void move(vec_t pos) noexcept {
+		// A local translation that is not affected by the scale or rotation.
+		Transform& move(vec_t pos) noexcept {
 			origin = pos;
+			return *this;
 		}
-		void normalize() noexcept {
+		// Renormalize the rotation quaternion
+		Transform& normalize() noexcept {
 			rotation = glm::normalize(rotation);
+			return *this;
 		}
 
-		void scale(T amount) noexcept {
+		// A local scale that is not affected by the origin or rotation
+		Transform& scale(T amount) noexcept {
 			size *= amount;
+			return *this;
 		}
-		void scale(const vec_t& amount) noexcept {
+		// A local scale that is not affected by the origin or rotation
+		Transform& scale(const vec_t& amount) noexcept {
 			size *= amount;
+			return *this;
 		}
 
 		void setSize(T amount) noexcept {
@@ -91,7 +122,7 @@ namespace ez {
 		}
 		template<typename = std::enable_if_t<N == 2>>
 		void setRotation(T amount) noexcept {
-			rotation = glm::polar(amount);
+			rotation = glm::polar(-amount);
 		}
 		template<typename = std::enable_if_t<N == 3>>
 		void setRotation(T angle, const vec_t& axis) noexcept {
@@ -102,7 +133,7 @@ namespace ez {
 			rotation = glm::rotation(from, to);
 		}
 
-		void alignLocalX(const vec_t& normVec) noexcept {
+		Transform& alignLocalX(const vec_t& normVec) noexcept {
 			if constexpr (N == 2) {
 				rotation = glm::tcomplex<T>(-normVec.y, normVec.x);
 			}
@@ -111,41 +142,45 @@ namespace ez {
 				glm::vec3 up = glm::cross(normVec, look);
 				rotation = glm::quatLookAtLH(look, up);
 			}
-			
+			return *this;
 		}
-		void alignLocalY(const vec_t& normVec) noexcept {
+		Transform& alignLocalY(const vec_t& normVec) noexcept {
 			if constexpr (N == 2) {
 				rotation = glm::tcomplex<T>(normVec.x, normVec.y);
 			}
 			else {
 				rotation = glm::quatLookAtLH(normVec, -localZ());
 			}
+			return *this;
 		}
 		template<typename = std::enable_if_t<N == 3>>
-		void alignLocalZ(const vec_t& normVec) noexcept {
+		Transform& alignLocalZ(const vec_t& normVec) noexcept {
 			rotation = glm::quatLookAtLH(normVec, localY());
+			return *this;
 		}
 
 		template<typename = std::enable_if_t<N == 2>>
-		void lookAt(const vec_t& point) noexcept {
+		Transform& lookAt(const vec_t& point) noexcept {
 			vec_t normVec = glm::normalize(point - origin);
 			alignLocalY(normVec);
+			return *this;
 		}
 		template<typename = std::enable_if_t<N == 3>>
-		void lookAt(const vec_t& point, const vec_t& up) noexcept {
+		Transform& lookAt(const vec_t& point, const vec_t& up) noexcept {
 			vec_t normVec = glm::normalize(point - origin);
 			rotation = glm::quatLookAtLH(normVec, up);
+			return *this;
 		}
 
-		void alignRight(const vec_t& normVec) noexcept {
-			alignLocalX(normVec);
+		Transform& alignRight(const vec_t& normVec) noexcept {
+			return alignLocalX(normVec);
 		}
-		void alignUp(const vec_t& normVec) noexcept {
-			alignLocalY(normVec);
+		Transform& alignUp(const vec_t& normVec) noexcept {
+			return alignLocalY(normVec);
 		}
 		template<typename = std::enable_if_t<N == 3>>
-		void alignLook(const vec_t& normVec) noexcept {
-			alignLocalZ(normVec);
+		Transform& alignLook(const vec_t& normVec) noexcept {
+			return alignLocalZ(normVec);
 		}
 
 
@@ -265,7 +300,7 @@ namespace ez {
 		}
 
 		rot_t toLocal(const rot_t& rot) const noexcept {
-			return rot / rotation;
+			return glm::conjugate(rotation) * rot;
 		}
 		rot_t toWorld(const rot_t& rot) const noexcept {
 			return rotation * rot;

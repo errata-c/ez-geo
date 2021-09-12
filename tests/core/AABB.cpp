@@ -1,4 +1,3 @@
-#define CATCH_CONFIG_MAIN
 #include <catch2/catch.hpp>
 
 #include <fmt/core.h>
@@ -14,30 +13,9 @@
 #include <ez/geo/Sphere.hpp>
 #include <ez/geo/Transform.hpp>
 
-static constexpr float epsf = 1e-4f;
-static constexpr double eps = 1e-6;
-
-bool approxEq(float a, float b) {
-	return std::abs(a - b) <= epsf;
-}
-bool approxEq(double a, double b) {
-	return std::abs(a - b) <= eps;
-}
-bool approxEq(const glm::vec2 & a, const glm::vec2 & b) {
-	return approxEq(a.x, b.x) && approxEq(a.y, b.y);
-}
-bool approxEq(const glm::dvec2& a, const glm::dvec2& b) {
-	return approxEq(a.x, b.x) && approxEq(a.y, b.y);
-}
-bool approxEq(const glm::vec3& a, const glm::vec3& b) {
-	return approxEq(a.x, b.x) && approxEq(a.y, b.y) && approxEq(a.z, b.z);
-}
-bool approxEq(const glm::dvec3& a, const glm::dvec3& b) {
-	return approxEq(a.x, b.x) && approxEq(a.y, b.y) && approxEq(a.z, b.z);
-}
+#include "util.hpp"
 
 TEST_CASE("aabb test", "[AABB]") {
-	fmt::print("Begin aabb test\n");
 	using namespace ez;
 
 	{
@@ -79,8 +57,6 @@ TEST_CASE("aabb test", "[AABB]") {
 
 		//REQUIRE(approxEq(aabb., glm::vec2{ 1, 1 }));
 	}
-
-	fmt::print("End aabb test\n\n");
 }
 
 TEST_CASE("circle test", "[Circle]") {
@@ -99,15 +75,15 @@ TEST_CASE("MMRect floating point") {
 	using IRect = ez::MMRect2<int>;
 
 
-	Rect rect0 = Rect::between(glm::vec2{0,0}, glm::vec2{100, 100});
-	Rect rect1 = Rect::between(glm::vec2{50, 50}, glm::vec2{100, 100});
-	Rect rect2 = Rect::between(glm::vec2{50, 50}, glm::vec2{200, 200});
+	Rect rect0 = Rect::between(glm::vec2{ 0,0 }, glm::vec2{ 100, 100 });
+	Rect rect1 = Rect::between(glm::vec2{ 50, 50 }, glm::vec2{ 100, 100 });
+	Rect rect2 = Rect::between(glm::vec2{ 50, 50 }, glm::vec2{ 200, 200 });
 
 	REQUIRE(rect0.merged(rect1) == rect0);
 	REQUIRE(rect2.contains(rect1));
 
-	REQUIRE(rect0.contains(glm::vec2{0,0}));
-	REQUIRE(rect0.contains(glm::vec2{100, 100}));
+	REQUIRE(rect0.contains(glm::vec2{ 0,0 }));
+	REQUIRE(rect0.contains(glm::vec2{ 100, 100 }));
 
 	Rect rect3 = rect0.merged(rect2);
 	REQUIRE(rect3.contains(rect0));
@@ -134,8 +110,3 @@ TEST_CASE("MMRect integer") {
 	REQUIRE(rect3.contains(rect2));
 	REQUIRE(rect3.contains(rect1));
 }
-
-// Test Line
-
-
-// Test Transform
