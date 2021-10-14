@@ -14,7 +14,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(ez-cmake)
 
-option(EZ_GEO_BUILD_TESTS "Build the test executables" ON)
+option(EZ_GEO_BUILD_TESTS "Build the test executables" OFF)
 set(EZ_GEO_CONFIG_DIR "share/ez-geo" CACHE STRING "The relative directory to install package config files.")
 
 find_package(ez-math CONFIG REQUIRED)
