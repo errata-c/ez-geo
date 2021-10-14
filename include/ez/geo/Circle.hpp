@@ -9,7 +9,7 @@ namespace ez {
 	{
 		using vec2_t = glm::tvec2<T>;
 
-		Circle(T r = static_cast<T>(1), const vec2_t& o = vec2_t{static_cast<T>(0)})
+		Circle(T r = T(1), const vec2_t& o = vec2_t{T(0)})
 			: radius(r)
 			, origin(o)
 		{}
@@ -55,7 +55,7 @@ namespace ez {
 		}
 
 		static Circle fromOuterTriangle(const vec2_t& c1, const vec2_t& c2, const vec2_t& c3) {
-			vec2_t H = (c3 + c1) / static_cast<T>(2);
+			vec2_t H = (c3 + c1) / T(2);
 			vec2_t G = H - c2;
 			H -= c1;
 			T H2 = glm::dot(H, H);

@@ -9,8 +9,8 @@ namespace ez {
 		using vec_t = glm::vec<N, T>;
 
 		Line()
-			: start(static_cast<T>(0))
-			, end(static_cast<T>(0))
+			: start(T(0))
+			, end(T(0))
 		{}
 		Line(const vec_t& p0, const vec_t& p1)
 			: start(p0)

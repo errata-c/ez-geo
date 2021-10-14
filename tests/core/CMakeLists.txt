@@ -6,6 +6,7 @@ add_executable(core_tests
 	"main.cpp"
 	"AABB.cpp"
 	"transform.cpp"
+	"all_compile.cpp"
 )
 target_link_libraries(core_tests PRIVATE 
 	fmt::fmt

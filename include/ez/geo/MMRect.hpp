@@ -6,6 +6,9 @@
 #include <algorithm>
 #include <ez/math/constants.hpp>
 
+// Conditionally active member functions need special care, they must be in a deduced context.
+// This requires something like below where we define an int K = N in the template
+
 namespace ez {
 	// Define a MMRect, a rect with min max points in absolute coordinates instead of one absolute and one relative.
 	// Additionally the bounds of this rect a considered inclusive, meaning maximum point is inside the rect.
@@ -14,17 +17,13 @@ namespace ez {
 		static_assert(N > 1, "ez::MMRect is not defined for dimensions less than two!");
 		static_assert(N <= 4, "ez::MMRect is no defined for dimensions greater than four!");
 
-		using vec_t = glm::vec<N, T>;
+		using vec_t = typename glm::vec<N, T>;
 		static constexpr int components = N;
 		using rect_t = MMRect<T, N>;
 
-		static constexpr bool has_x = N >= 1;
-		static constexpr bool has_y = N >= 2;
-		static constexpr bool has_z = N >= 3;
-
 		MMRect() noexcept
-			: min{ static_cast<T>(0) }
-			, max{ static_cast<T>(0) }
+			: min{ T(0) }
+			, max{ T(0) }
 		{};
 		MMRect(const vec_t& _min, const vec_t& _max) noexcept
 			: min(_min)
@@ -43,25 +42,24 @@ namespace ez {
 		MMRect& operator=(const MMRect&) noexcept = default;
 		MMRect& operator=(MMRect&&) noexcept = default;
 
-		template<typename = std::enable_if_t<has_x>>
 		T width() const noexcept {
 			return max[0] - min[0];
 		}
 
-		template<typename = std::enable_if_t<has_y>>
+		template<int K = N, typename = std::enable_if_t<(K > 1)>>
 		T height() const noexcept {
 			return max[1] - min[1];
 		}
-		template<typename = std::enable_if_t<N == 2>>
+		template<int K = N, typename = std::enable_if_t<(K == 2)>>
 		T area() const noexcept {
 			return width() * height();
 		}
 
-		template<typename = std::enable_if_t<has_z>>
+		template<int K = N, typename = std::enable_if_t<(K > 2)>>
 		T depth() const noexcept {
 			return max[2] - min[2];
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		T volume() const noexcept {
 			return width() * height() * depth();
 		}

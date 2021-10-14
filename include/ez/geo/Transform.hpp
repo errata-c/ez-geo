@@ -38,20 +38,20 @@ namespace ez {
 		static vec_t worldY() noexcept {
 			return trait_t::world[1];
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		static vec_t worldZ() noexcept {
 			return trait_t::world[2];
 		}
 
 		// A world space rotation that does not affect the origin
-		template<typename = std::enable_if_t<N == 2>>
+		template<int K = N, typename = std::enable_if_t<(K == 2)>>
 		Transform& rotate(const std::complex<T>& amount) noexcept {
 			rotation = rotation * amount;
 			return *this;
 		}
 
 		//  A world space rotation that does not affect the origin
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& rotate(const glm::qua<T>& amount) noexcept {
 			// This is the 3d quaternion rotation, simple quaternion multiplication performs local space rotation.
 			// We just swap the ordering
@@ -61,20 +61,20 @@ namespace ez {
 
 		// A world space rotation that does not affect the origin
 		// Clockwise
-		template<typename = std::enable_if_t<N == 2>>
+		template<int K = N, typename = std::enable_if_t<(K == 2)>>
 		Transform& rotate(T amount) noexcept {
 			rotation = glm::polar(-amount) * rotation;
 			return *this;
 		}
 		// A local rotation that does not affect the origin
 		// Clockwise around the axis
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& rotate(T angle, const vec_t& axis) noexcept {
 			rotate(glm::angleAxis(angle, axis));
 			return *this;
 		}
 		// A local rotation that does not affect the origin
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& rotate(const vec_t& from, const vec_t& to) noexcept {
 			rotate(glm::rotation(from, to));
 			return *this;
@@ -120,15 +120,15 @@ namespace ez {
 		void setRotation(const rot_t & amount) noexcept {
 			rotation = amount;
 		}
-		template<typename = std::enable_if_t<N == 2>>
+		template<int K = N, typename = std::enable_if_t<(K == 2)>>
 		void setRotation(T amount) noexcept {
 			rotation = glm::polar(-amount);
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		void setRotation(T angle, const vec_t& axis) noexcept {
 			rotation = glm::angleAxis(angle, axis);
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		void setRotation(const vec_t& from, const vec_t& to) noexcept {
 			rotation = glm::rotation(from, to);
 		}
@@ -153,19 +153,19 @@ namespace ez {
 			}
 			return *this;
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& alignLocalZ(const vec_t& normVec) noexcept {
 			rotation = glm::quatLookAtLH(normVec, localY());
 			return *this;
 		}
 
-		template<typename = std::enable_if_t<N == 2>>
+		template<int K = N, typename = std::enable_if_t<(K == 2)>>
 		Transform& lookAt(const vec_t& point) noexcept {
 			vec_t normVec = glm::normalize(point - origin);
 			alignLocalY(normVec);
 			return *this;
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& lookAt(const vec_t& point, const vec_t& up) noexcept {
 			vec_t normVec = glm::normalize(point - origin);
 			rotation = glm::quatLookAtLH(normVec, up);
@@ -178,7 +178,7 @@ namespace ez {
 		Transform& alignUp(const vec_t& normVec) noexcept {
 			return alignLocalY(normVec);
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<K == 3>>
 		Transform& alignLook(const vec_t& normVec) noexcept {
 			return alignLocalZ(normVec);
 		}
@@ -190,7 +190,7 @@ namespace ez {
 		vec_t getRightVector() const noexcept {
 			return localX();
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<K == 3>>
 		vec_t getLookVector() const noexcept {
 			return localZ();
 		}
@@ -201,7 +201,7 @@ namespace ez {
 		vec_t localX() const noexcept {
 			return glm::rotate(rotation, worldX());
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<K == 3>>
 		vec_t localZ() const noexcept {
 			return glm::rotate(rotation, worldZ());
 		}

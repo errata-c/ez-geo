@@ -1,5 +1,5 @@
 #pragma once
-#include <ez/math/MathConstants.hpp>
+#include <ez/math/constants.hpp>
 #include <ez/math/complex.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -32,20 +32,25 @@ namespace ez {
 			using vec_t = glm::vec<3, T>;
 			using quat_t = glm::tquat<T>;
 
+			static constexpr T eps1 = T(1) - ez::epsilon<T>();
+
 			quat_t rot;
-			T det = glm::dot(v1, v2);
+			T det = glm::dot(from, to);
+			// det approximately equal to +1
 			if (det >= eps1) {
-				rot = quat_t{};
+				// No rotation
+				rot = quat_t{T(1), T(0), T(0), T(0)};
 			}
+			// det approximately equal to -1
 			else if (det <= -eps1) {
-				rot = glm::angleAxis(ez::pi<T>(), vec3_t{ static_cast<T>(1), static_cast<T>(0), static_cast<T>(0) });
+				rot = glm::angleAxis(ez::pi<T>(), vec_t{ T(1), T(0), T(0) });
 			}
 			else {
-				T s = std::sqrt((static_cast<T>(1) + det) * static_cast<T>(2));
-				T invs = static_cast<T>(1) / s;
-				vec3_t c = glm::cross(v1, v2);
+				T s = std::sqrt((T(1) + det) * T(2));
+				T invs = T(1) / s;
+				vec_t c = glm::cross(from, to);
 				rot = {
-					s / static_cast<T>(2),
+					s / T(2),
 					c * invs
 				};
 				rot = glm::normalize(rot);

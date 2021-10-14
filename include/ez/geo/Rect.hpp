@@ -15,13 +15,9 @@ namespace ez {
 		using vec_t = glm::vec<N, T>;
 		static constexpr int components = N;
 
-		static constexpr bool has_x = N >= 1;
-		static constexpr bool has_y = N >= 2;
-		static constexpr bool has_z = N >= 3;
-
 		Rect() noexcept
-			: origin{static_cast<T>(0)}
-			, size{static_cast<T>(0)}
+			: origin{T(0)}
+			, size{T(0)}
 		{}
 		Rect(const vec_t& _origin, const vec_t& _size) noexcept
 			: origin(_origin)
@@ -40,32 +36,31 @@ namespace ez {
 		Rect& operator=(const Rect&) noexcept = default;
 		Rect& operator=(Rect&&) noexcept = default;
 
-		template<typename = std::enable_if_t<has_x>>
 		T width() const noexcept {
 			return size[0];
 		}
 
-		template<typename = std::enable_if_t<has_y>>
+		template<int K = N, typename = std::enable_if_t<(K > 1)>>
 		T height() const noexcept {
 			return size[1];
 		}
-		template<typename = std::enable_if_t<N == 2>>
+		template<int K = N, typename = std::enable_if_t<(K == 2)>>
 		T area() const noexcept {
-			return width() * height();
+			return size[0] * size[1];
 		}
 
-		template<typename = std::enable_if_t<has_z>>
+		template<int K = N, typename = std::enable_if_t<(K > 2)>>
 		T depth() const noexcept {
 			return size[2];
 		}
-		template<typename = std::enable_if_t<N == 3>>
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		T volume() const noexcept {
-			return width() * height() * depth();
+			return size[0] * size[1] * size[2];
 		}
 
 		vec_t center() const noexcept {
 			// Divide by two instead of multiply by 0.5, since the T variable could be an integer type.
-			return origin + size / static_cast<T>(2);
+			return origin + size / T(2);
 		}
 
 		void translate(const vec_t& offset) noexcept {
@@ -77,14 +72,14 @@ namespace ez {
 
 		void expand(const T & amount) noexcept {
 			vec_t c = center();
-			vec_t dim = size / static_cast<T>(2);
+			vec_t dim = size / T(2);
 			dim += amount;
 			origin = c - dim;
 			size = dim + dim;
 		}
 		void expand(const vec_t& amount) noexcept {
 			vec_t c = center();
-			vec_t dim = size / static_cast<T>(2);
+			vec_t dim = size / T(2);
 			dim += amount;
 			origin = c - dim;
 			size = dim + dim;
@@ -92,17 +87,17 @@ namespace ez {
 
 		void shrink(const T& amount) noexcept {
 			vec_t c = center();
-			vec_t dim = size / static_cast<T>(2);
+			vec_t dim = size / T(2);
 			dim -= amount;
-			dim = glm::max(dim, vec_t{ static_cast<T>(0) });
+			dim = glm::max(dim, vec_t{ T(0) });
 			origin = c - dim;
 			size = dim + dim;
 		}
 		void shrink(const vec_t& amount) noexcept {
 			vec_t c = center();
-			vec_t dim = size / static_cast<T>(2);
+			vec_t dim = size / T(2);
 			dim -= amount;
-			dim = glm::max(dim, vec_t{ static_cast<T>(0) });
+			dim = glm::max(dim, vec_t{ T(0) });
 			origin = c - dim;
 			size = dim + dim;
 		}
@@ -110,7 +105,7 @@ namespace ez {
 		template<typename F>
 		void scale(const F& factor) {
 			vec_t c = center();
-			vec_t dim = size / static_cast<T>(2);
+			vec_t dim = size / T(2);
 			dim *= factor;
 
 			origin = c - dim;
@@ -119,7 +114,7 @@ namespace ez {
 		template<typename F>
 		void scale(const glm::vec<N, F>& factor) {
 			vec_t c = center();
-			vec_t dim = size / static_cast<T>(2);
+			vec_t dim = size / T(2);
 			dim *= factor;
 
 			origin = c - dim;
