@@ -66,14 +66,14 @@ namespace ez {
 	template<typename T, std::size_t N>
 	class Ray: public RayBase<T, N> {
 	public:
-		using RayBase::RayBase;
+		using RayBase<T, N>::RayBase;
 		using vec_t = typename Ray::vec_t;
 	};
 
 	template<typename T>
 	class Ray<T, 2> : public RayBase<T, 2> {
 	public:
-		using RayBase::RayBase;
+		using RayBase<T, 2>::RayBase;
 		
 		using vec_t = typename Ray::vec_t;
 
@@ -116,7 +116,7 @@ namespace ez {
 	template<typename T>
 	class Ray<T, 3> : public RayBase<T, 3> {
 	public:
-		using RayBase::RayBase;
+		using RayBase<T, 3>::RayBase;
 
 		using vec_t = typename Ray::vec_t;
 
