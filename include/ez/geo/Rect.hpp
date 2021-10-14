@@ -42,12 +42,12 @@ namespace ez {
 
 		template<typename = std::enable_if_t<has_x>>
 		T width() const noexcept {
-			return max[0] - min[0];
+			return size[0]
 		}
 
 		template<typename = std::enable_if_t<has_y>>
 		T height() const noexcept {
-			return max[1] - min[1];
+			return size[1];
 		}
 		template<typename = std::enable_if_t<N == 2>>
 		T area() const noexcept {
@@ -56,7 +56,7 @@ namespace ez {
 
 		template<typename = std::enable_if_t<has_z>>
 		T depth() const noexcept {
-			return max[2] - min[2];
+			return size[2];
 		}
 		template<typename = std::enable_if_t<N == 3>>
 		T volume() const noexcept {
@@ -65,7 +65,7 @@ namespace ez {
 
 		vec_t center() const noexcept {
 			// Divide by two instead of multiply by 0.5, since the T variable could be an integer type.
-			return (minimum() + maximum()) / static_cast<T>(2);
+			return origin + size / static_cast<T>(2);
 		}
 
 		void translate(const vec_t& offset) noexcept {

@@ -19,9 +19,9 @@ namespace ez {
 			axis[0] = static_cast<T>(1);
 		}
 
-		Ray(const vec_t& ax, const vec_t& or)
+		Ray(const vec_t& ax, const vec_t& og)
 			: axis(ax)
-			, origin(or)
+			, origin(og)
 		{}
 
 		~Ray() = default;
