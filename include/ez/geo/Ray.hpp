@@ -8,27 +8,27 @@
 
 namespace ez {
 	template<typename T, int N>
-	class Ray {
+	class RayBase {
 	public:
 		using vec_t = glm::vec<N, T>;
 
-		Ray()
+		RayBase()
 			: axis(static_cast<T>(0))
 			, origin(static_cast<T>(0))
 		{
 			axis[0] = static_cast<T>(1);
 		}
 
-		Ray(const vec_t& ax, const vec_t& og)
+		RayBase(const vec_t& ax, const vec_t& og)
 			: axis(ax)
 			, origin(og)
 		{}
 
-		~Ray() = default;
-		Ray(const Ray&) = default;
-		Ray(Ray&&) noexcept = default;
-		Ray& operator=(const Ray&) = default;
-		Ray& operator=(Ray&&) noexcept = default;
+		~RayBase() = default;
+		RayBase(const RayBase&) = default;
+		RayBase(RayBase&&) noexcept = default;
+		RayBase& operator=(const RayBase&) = default;
+		RayBase& operator=(RayBase&&) noexcept = default;
 		
 		vec_t eval(T t) const {
 			return axis * t + origin;
@@ -39,26 +39,6 @@ namespace ez {
 		};
 		void translate(const vec_t& offset) {
 			origin += offset;
-		};
-		
-		template<typename = std::enable_if_t<N == 2>>
-		void rotate(T angle) {
-			glm::tcomplex<T> rot = glm::polar(angle);
-			Ray::rotate(rot);
-		};
-		template<typename = std::enable_if_t<N == 2>>
-		void rotate(const glm::tcomplex<T>& rot) {
-			axis = rot.rotate(axis);
-		};
-
-		template<typename = std::enable_if_t<N == 3>>
-		void rotate(T angle, const vec_t& axis) {
-			glm::quat rot = glm::angleAxis(angle, axis);
-			Ray::rotate(rot);
-		};
-		template<typename = std::enable_if_t<N == 3>>
-		void rotate(const glm::quat& rot) {
-			axis = glm::rotate(rot, axis);
 		};
 
 		bool isFacing(const vec_t& p) const {
@@ -76,7 +56,35 @@ namespace ez {
 			return glm::length(op - glm::dot(op, axis) * axis);
 		};
 
-		template<typename = std::enable_if_t<N == 3>>
+		static RayBase fromPoints(const vec_t& start, const vec_t& end) {
+			return RayBase{ glm::normalize(end - start), start };
+		};
+
+		vec_t axis, origin;
+	};
+
+	template<typename T, std::size_t N>
+	class Ray: public RayBase<T, N> {
+	public:
+		using RayBase::RayBase;
+		using vec_t = typename Ray::vec_t;
+	};
+
+	template<typename T>
+	class Ray<T, 2> : public RayBase<T, 2> {
+	public:
+		using RayBase::RayBase;
+		
+		using vec_t = typename Ray::vec_t;
+
+		void rotate(T angle) {
+			glm::tcomplex<T> rot = glm::polar(angle);
+			Ray::rotate(rot);
+		};
+		void rotate(const glm::tcomplex<T>& rot) {
+			axis = rot.rotate(axis);
+		};
+
 		vec_t nearestPointTo(const Ray& r) const {
 			vec_t n2 = glm::cross(r.getAxis(), glm::cross(axis, r.getAxis()));
 
@@ -90,7 +98,6 @@ namespace ez {
 				return eval(numer / denom);
 			}
 		};
-		template<typename = std::enable_if_t<N == 3>>
 		vec_t nearestPointFrom(const Ray& r) const {
 			vec_t n1 = glm::cross(axis, glm::cross(r.getAxis(), axis));
 
@@ -104,8 +111,23 @@ namespace ez {
 				return eval(numer / denom);
 			}
 		};
+	};
 
-		template<typename = std::enable_if_t<N == 3>>
+	template<typename T>
+	class Ray<T, 3> : public RayBase<T, 3> {
+	public:
+		using RayBase::RayBase;
+
+		using vec_t = typename Ray::vec_t;
+
+		void rotate(T angle, const vec_t& axis) {
+			glm::quat rot = glm::angleAxis(angle, axis);
+			Ray::rotate(rot);
+		};
+		void rotate(const glm::quat& rot) {
+			axis = glm::rotate(rot, axis);
+		};
+
 		vec_t nearestPointTo(const Ray& r, T& t) const {
 			vec_t n2 = glm::cross(r.getAxis(), glm::cross(axis, r.getAxis()));
 
@@ -120,7 +142,6 @@ namespace ez {
 				return eval(t);
 			}
 		};
-		template<typename = std::enable_if_t<N == 3>>
 		vec_t nearestPointFrom(const Ray& r, T& t) const {
 			vec_t n1 = glm::cross(axis, glm::cross(r.getAxis(), axis));
 
@@ -135,12 +156,6 @@ namespace ez {
 				return eval(t);
 			}
 		};
-
-		static Ray fromPoints(const vec_t& start, const vec_t& end) {
-			return Ray{ glm::normalize(end - start), start };
-		};
-
-		vec_t axis, origin;
 	};
 
 	template<typename T>
