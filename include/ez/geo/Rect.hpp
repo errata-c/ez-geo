@@ -42,7 +42,7 @@ namespace ez {
 
 		template<typename = std::enable_if_t<has_x>>
 		T width() const noexcept {
-			return size[0]
+			return size[0];
 		}
 
 		template<typename = std::enable_if_t<has_y>>

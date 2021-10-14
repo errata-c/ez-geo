@@ -281,7 +281,7 @@ namespace ez {
 
 
 	template<typename T>
-	bool intersect(const Ray3<T>& r, const Plane3<T>&, T& t) {
+	bool intersect(const Ray3<T>& r, const Plane3<T>& p, T& t) {
 		T numer = glm::dot(p.origin, p.normal) - glm::dot(p.normal, r.origin);
 		T denom = glm::dot(r.axis, p.normal);
 
