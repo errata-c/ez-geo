@@ -11,4 +11,3 @@
 #include <ez/geo/Rect.hpp>
 #include <ez/geo/Sphere.hpp>
 #include <ez/geo/Transform.hpp>
-#include <ez/geo/Util.hpp>

@@ -52,7 +52,7 @@ namespace ez {
 
 		//  A world space rotation that does not affect the origin
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
-		Transform& rotate(const glm::qua<T>& amount) noexcept {
+		Transform& rotate(const glm::tquat<T>& amount) noexcept {
 			// This is the 3d quaternion rotation, simple quaternion multiplication performs local space rotation.
 			// We just swap the ordering
 			rotation = amount * rotation;
@@ -66,17 +66,37 @@ namespace ez {
 			rotation = glm::polar(-amount) * rotation;
 			return *this;
 		}
-		// A local rotation that does not affect the origin
+		// A world rotation that does not affect the origin
 		// Clockwise around the axis
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& rotate(T angle, const vec_t& axis) noexcept {
 			rotate(glm::angleAxis(angle, axis));
 			return *this;
 		}
-		// A local rotation that does not affect the origin
+		// A world rotation that does not affect the origin
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& rotate(const vec_t& from, const vec_t& to) noexcept {
 			rotate(glm::rotation(from, to));
+			return *this;
+		}
+		
+		// A local space rotation
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
+		Transform& rotateLocal(const glm::tquat<T>& amount) noexcept {
+			// This is the 3d quaternion rotation, simple quaternion multiplication performs local space rotation.
+			// We just swap the ordering
+			rotation *= amount;
+			return *this;
+		}
+		// A local space rotation
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
+		Transform& rotateLocal(T angle, const vec_t& axis) noexcept {
+			rotateLocal(glm::angleAxis(angle, axis));
+			return *this;
+		}
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
+		Transform& rotateLocal(const vec_t& from, const vec_t& to) noexcept {
+			rotateLocal(glm::rotation(from, to));
 			return *this;
 		}
 
@@ -133,7 +153,8 @@ namespace ez {
 			rotation = glm::rotation(from, to);
 		}
 
-		Transform& alignLocalX(const vec_t& normVec) noexcept {
+		// Rotate from the current orientation to a new one such that the local x-axis is aligned with the vector passed in
+		Transform& alignX(const vec_t& normVec) noexcept {
 			if constexpr (N == 2) {
 				rotation = glm::tcomplex<T>(-normVec.y, normVec.x);
 			}
@@ -144,7 +165,8 @@ namespace ez {
 			}
 			return *this;
 		}
-		Transform& alignLocalY(const vec_t& normVec) noexcept {
+		// Rotate from the current orientation to a new one such that the local y-axis is aligned with the vector passed in
+		Transform& alignY(const vec_t& normVec) noexcept {
 			if constexpr (N == 2) {
 				rotation = glm::tcomplex<T>(normVec.x, normVec.y);
 			}
@@ -153,18 +175,39 @@ namespace ez {
 			}
 			return *this;
 		}
+		// Rotate from the current orientation to a new one such that the local z-axis is aligned with the vector passed in
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
-		Transform& alignLocalZ(const vec_t& normVec) noexcept {
+		Transform& alignZ(const vec_t& normVec) noexcept {
 			rotation = glm::quatLookAtLH(normVec, localY());
 			return *this;
 		}
 
+
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
+		Transform& alignXY(const vec_t & x, const vec_t & y) noexcept {
+			rotation = glm::quatLookAtLH(glm::cross(x, y), y);
+			return *this;
+		}
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
+		Transform& alignXZ(const vec_t& x, const vec_t& z) noexcept {
+			rotation = glm::quatLookAtLH(z, glm::cross(z, x));
+			return *this;
+		}
+		template<int K = N, typename = std::enable_if_t<(K == 3)>>
+		Transform& alignYZ(const vec_t& y, const vec_t& z) noexcept {
+			rotation = glm::quatLookAtLH(z, y);
+			return *this;
+		}
+
+
+		// Rotate such that the local y-axis is aimed at the point passed in.
 		template<int K = N, typename = std::enable_if_t<(K == 2)>>
 		Transform& lookAt(const vec_t& point) noexcept {
 			vec_t normVec = glm::normalize(point - origin);
 			alignLocalY(normVec);
 			return *this;
 		}
+		// Rotate such that the local z-axis is aimed at the point passed in.
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
 		Transform& lookAt(const vec_t& point, const vec_t& up) noexcept {
 			vec_t normVec = glm::normalize(point - origin);
@@ -173,14 +216,14 @@ namespace ez {
 		}
 
 		Transform& alignRight(const vec_t& normVec) noexcept {
-			return alignLocalX(normVec);
+			return alignX(normVec);
 		}
 		Transform& alignUp(const vec_t& normVec) noexcept {
-			return alignLocalY(normVec);
+			return alignY(normVec);
 		}
 		template<int K = N, typename = std::enable_if_t<K == 3>>
 		Transform& alignLook(const vec_t& normVec) noexcept {
-			return alignLocalZ(normVec);
+			return alignZ(normVec);
 		}
 
 

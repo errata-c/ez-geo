@@ -1,5 +1,7 @@
 #include <catch2/catch.hpp>
 
+#include <fmt/core.h>
+
 #include <ez/math/constants.hpp>
 #include <ez/geo/Transform.hpp>
 
@@ -94,4 +96,56 @@ TEST_CASE("transform3") {
 	REQUIRE(approxEq(rp, glm::vec3(1, 0, 0)));
 	REQUIRE(approxEq(first.toWorld(rp), glm::vec3(0, -1, 0)));
 
+}
+
+TEST_CASE("transform 3 alignment") {
+	Transform3 form;
+	form.alignXY(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+
+	glm::mat3 orient = form.getBasis();
+
+	REQUIRE(approxEq(orient[0], glm::vec3{ 0, 0, -1 }));
+	REQUIRE(approxEq(orient[1], glm::vec3{ 0, 1, 0 }));
+	REQUIRE(approxEq(orient[2], glm::vec3{ 1, 0, 0 }));
+
+	form.alignXZ(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+	orient = form.getBasis();
+
+	REQUIRE(approxEq(orient[0], glm::vec3{ 0, 0, -1 }));
+	REQUIRE(approxEq(orient[1], glm::vec3{ -1, 0, 0 }));
+	REQUIRE(approxEq(orient[2], glm::vec3{ 0, 1, 0 }));
+
+	form.alignYZ(glm::vec3(0, 0, -1), glm::vec3(0, 1, 0));
+	orient = form.getBasis();
+
+	REQUIRE(approxEq(orient[0], glm::vec3{ 1, 0, 0 }));
+	REQUIRE(approxEq(orient[1], glm::vec3{ 0, 0, -1 }));
+	REQUIRE(approxEq(orient[2], glm::vec3{ 0, 1, 0 }));
+
+	glm::mat3 mat1 = form.getBasis();
+	glm::mat3 mat2 = glm::mat3_cast(form.rotation);
+
+	REQUIRE(approxEq(mat1[0], mat2[0]));
+	REQUIRE(approxEq(mat1[1], mat2[1]));
+	REQUIRE(approxEq(mat1[2], mat2[2]));
+}
+
+TEST_CASE("Local rotations") {
+	Transform3 form;
+
+	form.rotateLocal(ez::half_pi(), glm::vec3{1, 0, 0});
+
+	glm::mat3 mat = form.getBasis();
+
+	REQUIRE(approxEq(mat[0], glm::vec3{1, 0, 0}));
+	REQUIRE(approxEq(mat[1], glm::vec3{0, 0, 1}));
+	REQUIRE(approxEq(mat[2], glm::vec3{0, -1, 0}));
+
+	form.rotateLocal(ez::half_pi(), glm::vec3{0, 1, 0});
+
+	mat = form.getBasis();
+
+	REQUIRE(approxEq(mat[0], glm::vec3{ 0, 1, 0 }));
+	REQUIRE(approxEq(mat[1], glm::vec3{ 0, 0, 1 }));
+	REQUIRE(approxEq(mat[2], glm::vec3{ 1, 0, 0 }));
 }
