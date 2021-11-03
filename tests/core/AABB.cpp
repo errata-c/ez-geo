@@ -19,7 +19,7 @@ TEST_CASE("aabb test", "[AABB]") {
 	using namespace ez;
 
 	{
-		AABB2<float> aabb = AABB2<float>::between(glm::vec2{ 2 }, glm::vec2{ 0 });
+		AABB2<float> aabb = AABB2<float>::Between(glm::vec2{ 2 }, glm::vec2{ 0 });
 
 		REQUIRE(approxEq(aabb.min, glm::vec2{ 0, 0 }));
 		REQUIRE(approxEq(aabb.max, glm::vec2{ 2, 2 }));
@@ -29,7 +29,7 @@ TEST_CASE("aabb test", "[AABB]") {
 	}
 
 	{
-		AABB2<double> aabb = AABB2<double>::between(glm::dvec2{ 2 }, glm::dvec2{ 0 });
+		AABB2<double> aabb = AABB2<double>::Between(glm::dvec2{ 2 }, glm::dvec2{ 0 });
 
 		REQUIRE(approxEq(aabb.min, glm::dvec2{ 0, 0 }));
 		REQUIRE(approxEq(aabb.max, glm::dvec2{ 2, 2 }));
@@ -39,7 +39,7 @@ TEST_CASE("aabb test", "[AABB]") {
 	}
 
 	{
-		AABB3<float> aabb = AABB3<float>::between(glm::vec3{ 2 }, glm::vec3{ 0 });
+		AABB3<float> aabb = AABB3<float>::Between(glm::vec3{ 2 }, glm::vec3{ 0 });
 
 		REQUIRE(approxEq(aabb.min, glm::vec3{ 0, 0, 0 }));
 		REQUIRE(approxEq(aabb.max, glm::vec3{ 2, 2, 2 }));
@@ -49,7 +49,7 @@ TEST_CASE("aabb test", "[AABB]") {
 	}
 
 	{
-		AABB3<double> aabb = AABB3<double>::between(glm::dvec3{ 2 }, glm::dvec3{ 0 });
+		AABB3<double> aabb = AABB3<double>::Between(glm::dvec3{ 2 }, glm::dvec3{ 0 });
 
 		REQUIRE(approxEq(aabb.min, glm::dvec3{ 0, 0, 0 }));
 		REQUIRE(approxEq(aabb.max, glm::dvec3{ 2, 2, 2 }));
@@ -75,9 +75,9 @@ TEST_CASE("MMRect floating point") {
 	using IRect = ez::MMRect2<int>;
 
 
-	Rect rect0 = Rect::between(glm::vec2{ 0,0 }, glm::vec2{ 100, 100 });
-	Rect rect1 = Rect::between(glm::vec2{ 50, 50 }, glm::vec2{ 100, 100 });
-	Rect rect2 = Rect::between(glm::vec2{ 50, 50 }, glm::vec2{ 200, 200 });
+	Rect rect0 = Rect::Between(glm::vec2{ 0,0 }, glm::vec2{ 100, 100 });
+	Rect rect1 = Rect::Between(glm::vec2{ 50, 50 }, glm::vec2{ 100, 100 });
+	Rect rect2 = Rect::Between(glm::vec2{ 50, 50 }, glm::vec2{ 200, 200 });
 
 	REQUIRE(rect0.merged(rect1) == rect0);
 	REQUIRE(rect2.contains(rect1));
@@ -94,9 +94,9 @@ TEST_CASE("MMRect floating point") {
 TEST_CASE("MMRect integer") {
 	using Rect = ez::MMRect2<int>;
 
-	Rect rect0 = Rect::between(glm::ivec2{ 0,0 }, glm::ivec2{ 100, 100 });
-	Rect rect1 = Rect::between(glm::ivec2{ 50, 50 }, glm::ivec2{ 100, 100 });
-	Rect rect2 = Rect::between(glm::ivec2{ 50, 50 }, glm::ivec2{ 200, 200 });
+	Rect rect0 = Rect::Between(glm::ivec2{ 0,0 }, glm::ivec2{ 100, 100 });
+	Rect rect1 = Rect::Between(glm::ivec2{ 50, 50 }, glm::ivec2{ 100, 100 });
+	Rect rect2 = Rect::Between(glm::ivec2{ 50, 50 }, glm::ivec2{ 200, 200 });
 
 	REQUIRE(rect0.merged(rect1) == rect0);
 	REQUIRE(rect2.contains(rect1));
@@ -109,4 +109,31 @@ TEST_CASE("MMRect integer") {
 	REQUIRE(rect3.contains(rect0));
 	REQUIRE(rect3.contains(rect2));
 	REQUIRE(rect3.contains(rect1));
+}
+
+TEST_CASE("MMRect 1") {
+	using Rect = ez::MMRect<float, 1>;
+
+	Rect rect0 = Rect::Between(0.f, 1.f);
+	Rect rect1 = Rect::Between(0.5f, 1.f);
+	Rect rect2 = Rect::Between(0.5f, 2.f);
+
+	REQUIRE(rect0.isValid());
+	REQUIRE(rect1.isValid());
+	REQUIRE(rect2.isValid());
+
+	REQUIRE(rect0.merged(rect1) == rect0);
+	REQUIRE(rect2.contains(rect1));
+
+	REQUIRE(rect0.contains(0.5f));
+	REQUIRE(rect1.contains(0.75f));
+	REQUIRE(rect2.contains(1.f));
+
+	REQUIRE_FALSE(rect0.contains(-1.f));
+	REQUIRE_FALSE(rect1.contains(2.f));
+	REQUIRE_FALSE(rect2.contains(4.f));
+
+	REQUIRE_FALSE(Rect::Between(0.f, 0.f).isValid());
+
+	//REQUIRE(rect0.ex)
 }
