@@ -1,19 +1,24 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(EZ_GEO
-	VERSION 0.4.0
+	VERSION 0.4.1
 	LANGUAGES C CXX
 )
 
-include(FetchContent)
+get_directory_property(IS_SUBPROJECT PARENT_DIRECTORY)
 
-FetchContent_Declare(
-	ez-cmake
-	GIT_REPOSITORY "https://github.com/errata-c/ez-cmake.git"
-	GIT_TAG "main"
-)
-FetchContent_MakeAvailable(ez-cmake)
+if(NOT IS_SUBPROJECT)
+	include(FetchContent)
 
+	FetchContent_Declare(
+		ez-cmake
+		GIT_REPOSITORY "https://github.com/errata-c/ez-cmake.git"
+		GIT_TAG "main"
+	)
+	FetchContent_MakeAvailable(ez-cmake)
+endif()
+
+option(EZ_GEO_BUILD_BENCHMARKS "Build the benchmarking executable" OFF)
 option(EZ_GEO_BUILD_TESTS "Build the test executables" OFF)
 set(EZ_GEO_CONFIG_DIR "share/ez-geo" CACHE STRING "The relative directory to install package config files.")
 
@@ -48,26 +53,28 @@ if(EZ_GEO_BUILD_TESTS)
 	add_subdirectory("tests")
 endif()
 
-install(
-	DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
-	TYPE INCLUDE
-	FILES_MATCHING
-	PATTERN "*.h" PATTERN "*.hpp"
-)
+if(NOT IS_SUBPROJECT)
+	install(
+		DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/"
+		TYPE INCLUDE
+		FILES_MATCHING
+		PATTERN "*.h" PATTERN "*.hpp"
+	)
 
-install(TARGETS ez-geo
-	EXPORT ez-geo-targets
-	RUNTIME DESTINATION "bin/$<CONFIG>"
-	ARCHIVE DESTINATION "lib/$<CONFIG>"
-	LIBRARY DESTINATION "lib/$<CONFIG>"
-)
+	install(TARGETS ez-geo
+		EXPORT ez-geo-targets
+		RUNTIME DESTINATION "bin/$<CONFIG>"
+		ARCHIVE DESTINATION "lib/$<CONFIG>"
+		LIBRARY DESTINATION "lib/$<CONFIG>"
+	)
 
-install_package(
-	NAME "ez-geo"
-	NAMESPACE "ez::"
-	EXPORT "ez-geo-targets"
-	VERSION "${EZ_GEO_VERSION}"
-	COMPATIBILITY "SameMajorVersion"
-	DESTINATION "${EZ_GEO_CONFIG_DIR}"
-	PRECONFIG "cmake/preconfig.cmake"
-)
+	install_package(
+		NAME "ez-geo"
+		NAMESPACE "ez::"
+		EXPORT "ez-geo-targets"
+		VERSION "${EZ_GEO_VERSION}"
+		COMPATIBILITY "SameMajorVersion"
+		DESTINATION "${EZ_GEO_CONFIG_DIR}"
+		PRECONFIG "cmake/preconfig.cmake"
+	)
+endif()

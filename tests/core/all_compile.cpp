@@ -1,4 +1,6 @@
-// Just throw all the headers in to check that everything is in working order.
+
+// This file just adds in all the headers for compilation
+// This will check for superficial compile errors like syntax and such.
 
 #include <ez/geo/AABB.hpp>
 #include <ez/geo/Circle.hpp>
