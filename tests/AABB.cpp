@@ -1,5 +1,3 @@
-#include <catch2/catch_all.hpp>
-
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 #include <fmt/format.h>
@@ -14,6 +12,8 @@
 #include <ez/geo/Transform.hpp>
 
 #include "util.hpp"
+
+#include <catch2/catch_all.hpp>
 
 TEST_CASE("aabb test", "[AABB]") {
 	using namespace ez;
@@ -83,7 +83,7 @@ TEST_CASE("MMRect floating point") {
 	REQUIRE(rect2.contains(rect1));
 
 	REQUIRE(rect0.contains(glm::vec2{ 0,0 }));
-	REQUIRE(rect0.contains(glm::vec2{ 100, 100 }));
+	REQUIRE(rect0.contains(glm::vec2{ 100, 100 } - 0.001f));
 
 	Rect rect3 = rect0.merged(rect2);
 	REQUIRE(rect3.contains(rect0));
@@ -118,9 +118,9 @@ TEST_CASE("MMRect 1") {
 	Rect rect1 = Rect::Between(0.5f, 1.f);
 	Rect rect2 = Rect::Between(0.5f, 2.f);
 
-	REQUIRE(rect0.isValid());
-	REQUIRE(rect1.isValid());
-	REQUIRE(rect2.isValid());
+	REQUIRE(rect0.valid());
+	REQUIRE(rect1.valid());
+	REQUIRE(rect2.valid());
 
 	REQUIRE(rect0.merged(rect1) == rect0);
 	REQUIRE(rect2.contains(rect1));
@@ -133,7 +133,7 @@ TEST_CASE("MMRect 1") {
 	REQUIRE_FALSE(rect1.contains(2.f));
 	REQUIRE_FALSE(rect2.contains(4.f));
 
-	REQUIRE_FALSE(Rect::Between(0.f, 0.f).isValid());
+	REQUIRE_FALSE(Rect::Between(0.f, 0.f).valid());
 
 	//REQUIRE(rect0.ex)
 }

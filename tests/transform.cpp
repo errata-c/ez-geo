@@ -1,11 +1,11 @@
-#include <catch2/catch_all.hpp>
-
 #include <fmt/core.h>
 
 #include <ez/math/constants.hpp>
 #include <ez/geo/Transform.hpp>
 
 #include "util.hpp"
+
+#include <catch2/catch_all.hpp>
 
 using Transform2 = ez::Transform<float, 2>;
 using Transform3 = ez::Transform<float, 3>;
@@ -133,7 +133,7 @@ TEST_CASE("transform 3 alignment") {
 TEST_CASE("Local rotations") {
 	Transform3 form;
 
-	form.rotateLocal(ez::half_pi(), glm::vec3{1, 0, 0});
+	form.rotate_local(ez::half_pi(), glm::vec3{1, 0, 0});
 
 	glm::mat3 mat = form.getBasis();
 
@@ -141,7 +141,7 @@ TEST_CASE("Local rotations") {
 	REQUIRE(approxEq(mat[1], glm::vec3{0, 0, 1}));
 	REQUIRE(approxEq(mat[2], glm::vec3{0, -1, 0}));
 
-	form.rotateLocal(ez::half_pi(), glm::vec3{0, 1, 0});
+	form.rotate_local(ez::half_pi(), glm::vec3{0, 1, 0});
 
 	mat = form.getBasis();
 

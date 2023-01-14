@@ -4,46 +4,38 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <glm/gtc/vec1.hpp>
 #include <algorithm>
 #include <ez/math/constants.hpp>
 
-// Conditionally active member functions need special care, they must be in a deduced context.
-// This requires something like below where we define an int K = N in the template
-
 namespace ez {
-	namespace intern {
-		template<typename vec_t>
-		vec_t max(const vec_t & a, const vec_t & b) noexcept {
-			if constexpr (ez::is_vec_strict_v<vec_t>) {
-				return glm::max(a, b);
-			}
-			else {
-				return std::max(a, b);
-			}
-		}
-		template<typename vec_t>
-		vec_t min(const vec_t& a, const vec_t& b) noexcept {
-			if constexpr (ez::is_vec_strict_v<vec_t>) {
-				return glm::min(a, b);
-			}
-			else {
-				return std::min(a, b);
-			}
-		}
-	}
-
 	// Define a MMRect, a rect with min max points in absolute coordinates instead of one absolute and one relative.
-	// Additionally the bounds of this rect a considered inclusive, meaning maximum point is inside the rect.
-	template<typename T, int N>
+	template<typename T, glm::length_t N, bool inclusive = false>
 	struct MMRect {
 		static_assert(N > 0, "ez::MMRect requires a number of dimensions greater than zero!");
 		static_assert(N <= 4, "ez::MMRect is not defined for dimensions greater than four!");
 		static_assert(std::is_arithmetic_v<T>, "ez::MMRect requires an arithmetic value type!");
 
-		using rect_t = MMRect<T, N>;
+		using self_t = MMRect<T, N>;
 		using vec_t = std::conditional_t<N == 1, T, typename glm::vec<N, T>>;
 		static constexpr int Components = N;
 
+	private:
+		static constexpr bool
+			is_floating_point = std::is_floating_point_v<T>,
+			is_vec = Components > 1;
+
+		static const typename glm::vec<N, T>& cvt( const vec_t& val) noexcept {
+			return reinterpret_cast<const typename glm::vec<N, T>&>(val);
+		}
+		static typename glm::vec<N, T>& cvt(vec_t& val) noexcept {
+			return reinterpret_cast<typename glm::vec<N, T>&>(val);
+		}
+
+		static constexpr typename glm::vec<N, T> Eps() {
+			return typename glm::vec<N, T>(ez::epsilon<T>());
+		}
+	public:
 		MMRect() noexcept
 			: min{ T(0) }
 			, max{ T(0) }
@@ -66,7 +58,7 @@ namespace ez {
 		MMRect& operator=(MMRect&&) noexcept = default;
 
 		T width() const noexcept {
-			return max[0] - min[0];
+			return cvt(max)[0] - cvt(min)[0];
 		}
 
 		template<int K = N, typename = std::enable_if_t<(K > 1)>>
@@ -96,265 +88,245 @@ namespace ez {
 			return (min + max) / T(2);
 		};
 
-		rect_t& translate(const vec_t& offset) noexcept {
+		self_t& translate(const vec_t& offset) noexcept {
 			min += offset;
 			max += offset;
 
 			return *this;
 		};
-		rect_t& centerTo(const vec_t& point) noexcept {
+		self_t& center_to(const vec_t& point) noexcept {
 			return translate(point - center());
 		};
 		
-		rect_t& expand(const T& amount) noexcept {
+		self_t& expand(const T& amount) noexcept {
 			min -= amount;
 			max += amount;
 
 			return *this;
 		};
 		template<int K, std::enable_if_t<(K > 1)>>
-		rect_t& expand(const vec_t& amount) noexcept {
+		self_t& expand(const vec_t& amount) noexcept {
 			min -= amount;
 			max += amount;
 
 			return *this;
 		};
-		rect_t& expand(const vec_t& minv, const vec_t & maxv) noexcept {
+		self_t& expand(const vec_t& minv, const vec_t & maxv) noexcept {
 			min -= minv;
 			max += maxv;
 
 			return *this;
 		};
-		rect_t expanded(const T& amount) const noexcept {
-			rect_t copy = *this;
+		self_t expanded(const T& amount) const noexcept {
+			self_t copy = *this;
 			return copy.expand(amount);
 		};
 		template<int K, std::enable_if_t<(K > 1)>>
-		rect_t expanded(const vec_t& amount) const noexcept {
-			rect_t copy = *this;
+		self_t expanded(const vec_t& amount) const noexcept {
+			self_t copy = *this;
 			return copy.expand(amount);
 		};
-		rect_t expanded(const vec_t& minv, const vec_t& maxv) const noexcept {
-			rect_t copy = *this;
+		self_t expanded(const vec_t& minv, const vec_t& maxv) const noexcept {
+			self_t copy = *this;
 			return copy.expand(minv, maxv);
 		};
 
 
-		rect_t& shrink(const T& amount) noexcept {
-			min += amount;
-			max -= amount;
-			vec_t c = center();
-			min = intern::max(c, min);
-			max = intern::min(c, max);
-
-			return *this;
-		};
-		template<int K, std::enable_if_t<(K > 1)>>
-		rect_t& shrink(const vec_t& amount) noexcept {
-			min += amount;
-			max -= amount;
-			vec_t c = center();
-			min = intern::max(c, min);
-			max = intern::min(c, max);
-
-			return *this;
-		};
-		rect_t& shrink(const vec_t& minv, const vec_t& maxv) noexcept {
+		self_t& contract(const vec_t& minv, const vec_t& maxv) noexcept {
 			min += minv;
 			max -= maxv;
 			vec_t c = center();
 
-			min = intern::max(c, min);
-			max = intern::min(c, max);
+			min = glm::min(cvt(c), cvt(min));
+			max = glm::max(cvt(c), cvt(max));
 
 			return *this;
 		};
-		rect_t shrinked(const T& amount) const noexcept {
-			rect_t copy = *this;
+		template<int K, std::enable_if_t<(K != 1)>>
+		self_t& contract(const T& amount) noexcept {
+			return contract(vec_t(amount), vec_t(amount));
+		};
+		self_t& contract(const vec_t& amount) noexcept {
+			return contract(amount, amount);
+		};
+		
+		template<int K, std::enable_if_t<(K != 1)>>
+		self_t contracted(const T& amount) const noexcept {
+			self_t copy = *this;
 			return copy.shrink(amount);
 		};
-		template<int K, std::enable_if_t<(K > 1)>>
-		rect_t shrinked(const vec_t& amount) const noexcept {
-			rect_t copy = *this;
+		self_t contracted(const vec_t& amount) const noexcept {
+			self_t copy = *this;
 			return copy.shrink(amount);
 		};
-		rect_t shrinked(const vec_t& minv, const vec_t& maxv) const noexcept {
-			rect_t copy = *this;
+		self_t contracted(const vec_t& minv, const vec_t& maxv) const noexcept {
+			self_t copy = *this;
 			return copy.shrink(minv, maxv);
 		};
 		
 
 		// By default the scale origin is the center of the Rect
 		template<typename F>
-		rect_t& scale(const F& factor) noexcept {
-			vec_t c = center();
+		self_t& scale(const F& factor) noexcept {
+			min *= factor;
+			max *= factor;
+
+			return *this;
+		};
+		template<typename F>
+		self_t& scale(const glm::vec<N, F>& factor) noexcept {
+			min *= factor;
+			max *= factor;
+
+			return *this;
+		};
+		template<typename F>
+		self_t& scale(const vec_t& c, const F& factor) noexcept {
 			min = (min - c) * factor + c;
 			max = (max - c) * factor + c;
 
 			return *this;
 		};
 		template<typename F>
-		rect_t& scale(const glm::vec<N, F>& factor) noexcept {
-			vec_t c = center();
+		self_t& scale(const vec_t& c, const glm::vec<N, F>& factor) noexcept {
 			min = (min - c) * factor + c;
 			max = (max - c) * factor + c;
 
 			return *this;
 		};
-		template<typename F>
-		rect_t& scale(const vec_t& c, const F& factor) noexcept {
-			min = (min - c) * factor + c;
-			max = (max - c) * factor + c;
 
-			return *this;
-		};
 		template<typename F>
-		rect_t& scale(const vec_t& c, const glm::vec<N, F>& factor) noexcept {
-			min = (min - c) * factor + c;
-			max = (max - c) * factor + c;
-
-			return *this;
-		};
-		template<typename F>
-		rect_t scaled(const F& factor) const noexcept {
-			rect_t copy = *this;
+		self_t scaled(const F& factor) const noexcept {
+			self_t copy = *this;
 			return copy.scale(factor);
 		};
 		template<typename F>
-		rect_t scaled(const glm::vec<N, F>& factor) const noexcept {
-			rect_t copy = *this;
+		self_t scaled(const glm::vec<N, F>& factor) const noexcept {
+			self_t copy = *this;
 			return copy.scale(factor);
 		};
 		template<typename F>
-		rect_t scaled(const vec_t& c, const F& factor) const noexcept {
-			rect_t copy = *this;
+		self_t scaled(const vec_t& c, const F& factor) const noexcept {
+			self_t copy = *this;
 			return copy.scale(c, factor);
 		};
 		template<typename F>
-		rect_t scaled(const vec_t& c, const glm::vec<N, F>& factor) const noexcept {
-			rect_t copy = *this;
+		self_t scaled(const vec_t& c, const glm::vec<N, F>& factor) const noexcept {
+			self_t copy = *this;
 			return copy.scale(c, factor);
 		};
 
 
-		rect_t& merge(const rect_t& other) noexcept {
-			max = intern::max(max, other.max);
-			min = intern::min(min, other.min);
+		self_t& merge(const self_t& other) noexcept {
+			cvt(max) = glm::max(cvt(max), cvt(other.max));
+			cvt(min) = glm::min(cvt(min), cvt(other.min));
 
 			return *this;
 		};
-		rect_t& merge(const vec_t& point) noexcept {
-			using namespace glm;
-
-			max = intern::max(max, point);
-			min = intern::min(min, point);
+		self_t& merge(const vec_t& point) noexcept {
+			cvt(max) = glm::max(cvt(max), cvt(point));
+			cvt(min) = glm::min(cvt(min), cvt(point));
 
 			return *this;
 		};
 
-		rect_t merged(const rect_t& other) const noexcept {
-			rect_t copy = *this;
+		self_t merged(const self_t& other) const noexcept {
+			self_t copy = *this;
 			copy.merge(other);
 			return copy;
 		};
-		rect_t merged(const vec_t& point) const noexcept {
-			rect_t copy = *this;
+		self_t merged(const vec_t& point) const noexcept {
+			self_t copy = *this;
 			copy.merge(point);
 			return copy;
 		};
 
 		// This function always succeeds.
-		vec_t toWorld(const vec_t& point) const noexcept {
+		vec_t to_world(const vec_t& point) const noexcept {
 			return point * (max - min) + min;
 		};
 		// Check isValid prior to calling this function if theres a chance the rect could be invalid.
-		vec_t toLocal(const vec_t& point) const noexcept {
+		vec_t to_local(const vec_t& point) const noexcept {
 			return (point - min) / (max - min);
 		};
-
-		// Check if the assumptions made by this struct are maintained. min must always be less than max
-		bool isValid() const noexcept {
-			// I'm still trying to find a better way to do this.
-			// I need to be able to handle multiple components, but also single components
-
-			if constexpr (std::is_floating_point_v<T>) {
-				for (int i = 0; i < Components; ++i) {
-					if ((minptr()[i] - maxptr()[i]) >= -ez::epsilon<T>()) {
-						return false;
-					}
+		
+		// When inclusive, the rect is invalid when max is less than min.
+		// When exclusive, the rect is invalid when max is less than or equal to min.
+		bool valid() const noexcept {
+			if constexpr (is_floating_point) {
+				if constexpr (inclusive) {
+					return glm::all(glm::greaterThanEqual(
+						cvt(max) - cvt(min),
+						-Eps()
+					));
+				}
+				else {
+					return glm::all(glm::greaterThanEqual(
+						cvt(max) - cvt(min),
+						Eps()
+					));
 				}
 			}
 			else {
-				for (int i = 0; i < Components; ++i) {
-					if (minptr()[i] >= maxptr()[i]) {
-						return false;
-					}
+				if  constexpr (inclusive) {
+					return glm::all(glm::greaterThanEqual(cvt(max), cvt(min)));
+				}
+				else {
+					return glm::all(glm::greaterThan(cvt(max), cvt(min)));
 				}
 			}
-			return true;
+		};
+		bool invalid() const noexcept {
+			return !valid();
 		};
 		
 		bool contains(const vec_t& point) const noexcept {
-			if constexpr (std::is_floating_point_v<T>) {
-				for (int i = 0; i < Components; ++i) {
-					if ((((const T*)&point)[i] - minptr()[i]) < -ez::epsilon<T>()) {
-						return false;
-					}
-					if ((maxptr()[i] - ((const T*)&point)[i]) < -ez::epsilon<T>()) {
-						return false;
-					}
+			if constexpr (inclusive) {
+				if constexpr (is_floating_point) {
+					return
+						glm::all(glm::lessThanEqual(cvt(min) - cvt(point), Eps())) &&
+						glm::all(glm::greaterThanEqual(cvt(max) - cvt(point), -Eps()));
+				}
+				else {
+					return
+						glm::all(glm::lessThanEqual(cvt(min), cvt(point))) &&
+						glm::all(glm::greaterThanEqual(cvt(max), cvt(point)));
 				}
 			}
 			else {
-				for (int i = 0; i < Components; ++i) {
-					if (minptr()[i] > ((const T*)&point)[i]) {
-						return false;
-					}
-					if (maxptr()[i] <= ((const T*)&point)[i]) {
-						return false;
-					}
+				if constexpr (is_floating_point) {
+					return
+						glm::all(glm::lessThanEqual(cvt(min) - cvt(point), Eps())) &&
+						glm::all(glm::greaterThanEqual(cvt(max) - cvt(point), Eps()));
+				}
+				else {
+					return
+						glm::all(glm::lessThanEqual(cvt(min), cvt(point))) &&
+						glm::all(glm::greaterThan(cvt(max), cvt(point)));
 				}
 			}
-			
-			return true;
 		};
 
-		bool contains(const rect_t& other) const noexcept {
-			if constexpr (std::is_floating_point_v<T>) {
-				for (int i = 0; i < Components; ++i) {
-					if ((other.minptr()[i] - minptr()[i]) < -ez::epsilon<T>()) {
-						return false;
-					}
-					if ((maxptr()[i] - other.maxptr()[i]) < -ez::epsilon<T>()) {
-						return false;
-					}
-				}
+		bool contains(const self_t& other) const noexcept {
+			if constexpr (is_floating_point) {
+				return !(
+					glm::any(glm::greaterThan(cvt(min) - cvt(other.min), Eps())) ||
+					glm::any(glm::lessThan(cvt(max) - cvt(other.max), -Eps()))
+				);
 			}
 			else {
-				for (int i = 0; i < Components; ++i) {
-					if (minptr()[i] > other.minptr()[i]) {
-						return false;
-					}
-					if (maxptr()[i] < other.maxptr()[i]) {
-						return false;
-					}
-				}
+				return !(
+					glm::any(glm::greaterThan(cvt(min), cvt(other.min))) ||
+					glm::any(glm::lessThan(cvt(max), cvt(other.max)))
+				);
 			}
-			
-			return true;
 		};
 
-		bool operator==(const rect_t& other) const noexcept {
-			if constexpr (std::is_floating_point_v<T>) {
-				for (int i = 0; i < Components; ++i) {
-					if (std::abs(minptr()[i] - other.minptr()[i]) > ez::epsilon<T>()) {
-						return false;
-					}
-					if (std::abs(maxptr()[i] - other.maxptr()[i]) > ez::epsilon<T>()) {
-						return false;
-					}
-				}
-				return true;
+		bool operator==(const self_t& other) const noexcept {
+			if constexpr (is_floating_point) {
+				return
+					glm::all(glm::lessThan(glm::abs(cvt(min) - cvt(other.min)), Eps())) &&
+					glm::all(glm::lessThan(glm::abs(cvt(max) - cvt(other.max)), Eps()));
 			}
 			else {
 				return
@@ -362,17 +334,11 @@ namespace ez {
 					max == other.max;
 			}
 		}
-		bool operator!=(const rect_t& other) const noexcept {
-			if constexpr (std::is_floating_point_v<T>) {
-				for (int i = 0; i < Components; ++i) {
-					if (std::abs(minptr()[i] - other.minptr()[i]) > ez::epsilon<T>()) {
-						return true;
-					}
-					if (std::abs(maxptr()[i] - other.maxptr()[i]) > ez::epsilon<T>()) {
-						return true;
-					}
-				}
-				return false;
+		bool operator!=(const self_t& other) const noexcept {
+			if constexpr (is_floating_point) {
+				return 
+					glm::any(glm::greaterThan(glm::abs(cvt(min) - cvt(other.min)), Eps())) ||
+					glm::any(glm::greaterThan(glm::abs(cvt(max) - cvt(other.max)), Eps()));
 			}
 			else {
 				return
@@ -381,31 +347,18 @@ namespace ez {
 			}
 		}
 
-		static rect_t Between(const vec_t& p0, const vec_t& p1) noexcept {
-			rect_t tmp;
-			tmp.max = intern::max(p0, p1);
-			tmp.min = intern::min(p0, p1);
+		static self_t Between(const vec_t& p0, const vec_t& p1) noexcept {
+			self_t tmp;
+			cvt(tmp.max) = glm::max(cvt(p0), cvt(p1));
+			cvt(tmp.min) = glm::min(cvt(p0), cvt(p1));
 			return tmp;
 		};
-		static rect_t Merge(const rect_t& a, const rect_t& b) noexcept {
-			rect_t tmp = a;
+		static self_t Merge(const self_t& a, const self_t& b) noexcept {
+			self_t tmp = a;
 			return tmp.merge(b);
 		};
 
 		vec_t min, max;
-	private:
-		T* minptr() noexcept {
-			return (T*)(&min);
-		}
-		T* maxptr() noexcept {
-			return (T*)(&max);
-		}
-		const T* minptr() const noexcept {
-			return (const T*)(&min);
-		}
-		const T* maxptr() const noexcept {
-			return (const T*)(&max);
-		}
 	};
 
 	template<typename T>

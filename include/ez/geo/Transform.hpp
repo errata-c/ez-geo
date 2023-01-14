@@ -32,14 +32,14 @@ namespace ez {
 		Transform(Transform&&) noexcept = default;
 		Transform& operator=(Transform&&) noexcept = default;
 
-		static vec_t worldX() noexcept {
+		static vec_t WorldX() noexcept {
 			return trait_t::world[0];
 		}
-		static vec_t worldY() noexcept {
+		static vec_t WorldY() noexcept {
 			return trait_t::world[1];
 		}
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
-		static vec_t worldZ() noexcept {
+		static vec_t WorldZ() noexcept {
 			return trait_t::world[2];
 		}
 
@@ -82,7 +82,7 @@ namespace ez {
 		
 		// A local space rotation
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
-		Transform& rotateLocal(const glm::tquat<T>& amount) noexcept {
+		Transform& rotate_local(const glm::tquat<T>& amount) noexcept {
 			// This is the 3d quaternion rotation, simple quaternion multiplication performs local space rotation.
 			// We just swap the ordering
 			rotation *= amount;
@@ -90,12 +90,12 @@ namespace ez {
 		}
 		// A local space rotation
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
-		Transform& rotateLocal(T angle, const vec_t& axis) noexcept {
-			rotateLocal(glm::angleAxis(angle, axis));
+		Transform& rotate_local(T angle, const vec_t& axis) noexcept {
+			rotate_local(glm::angleAxis(angle, axis));
 			return *this;
 		}
 		template<int K = N, typename = std::enable_if_t<(K == 3)>>
-		Transform& rotateLocal(const vec_t& from, const vec_t& to) noexcept {
+		Transform& rotate_local(const vec_t& from, const vec_t& to) noexcept {
 			rotateLocal(glm::rotation(from, to));
 			return *this;
 		}
@@ -239,14 +239,14 @@ namespace ez {
 		}
 
 		vec_t localY() const noexcept {
-			return glm::rotate(rotation, worldY());
+			return glm::rotate(rotation, WorldY());
 		}
 		vec_t localX() const noexcept {
-			return glm::rotate(rotation, worldX());
+			return glm::rotate(rotation, WorldX());
 		}
 		template<int K = N, typename = std::enable_if_t<K == 3>>
 		vec_t localZ() const noexcept {
-			return glm::rotate(rotation, worldZ());
+			return glm::rotate(rotation, WorldZ());
 		}
 
 		basis_t getBasis() const noexcept {
