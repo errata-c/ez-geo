@@ -16,7 +16,7 @@ FetchContent_Declare(
 	ez-math
 	GIT_REPOSITORY "https://github.com/errata-c/ez-math.git"
 	GIT_TAG "main"
-	FIND_PACKAGE_ARGS CONFIG REQUIRED
+	FIND_PACKAGE_ARGS CONFIG
 )
 FetchContent_MakeAvailable(ez-cmake ez-math)
 
